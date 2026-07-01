@@ -1,0 +1,514 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --bg-color: #07080b;
+  --bg-card: #0d0f14;
+  --bg-card-hover: #12151d;
+
+  --text-main: #f3f4f6;
+  --text-muted: #9ca3af;
+  --text-dim: #6b7280;
+
+  --border-color: rgba(255, 255, 255, 0.04);
+  --border-color-focus: rgba(0, 240, 255, 0.3);
+
+  --accent-color: #00f0ff;
+  --accent-gradient: linear-gradient(135deg, #00f0ff 0%, #3b82f6 100%);
+  --accent-glow: rgba(0, 240, 255, 0.1);
+
+  --error-color: #ef4444;
+  --success-color: #10b981;
+
+  --bg-sidebar: rgba(13, 15, 20, 0.4);
+  --bg-sidebar-mobile: rgba(13, 15, 20, 0.95);
+  --bg-overlay: rgba(7, 8, 11, 0.82);
+  --bg-input: rgba(255, 255, 255, 0.02);
+  --bg-input-focus: rgba(255, 255, 255, 0.04);
+  --text-json: #a5f3fc;
+  --text-code: #ff79c6;
+  --bg-code: rgba(255, 255, 255, 0.05);
+  --bg-pre: rgba(0, 0, 0, 0.2);
+  --bg-btn-secondary: rgba(255, 255, 255, 0.03);
+  --bg-btn-secondary-hover: rgba(255, 255, 255, 0.06);
+
+  --text-success: #a7f3d0;
+  --text-warning: #fde68a;
+  --text-danger: #fca5a5;
+
+  --text-on-accent: #08090d;
+  --accent-border-dashed: rgba(0, 240, 255, 0.3);
+  --bg-hover: rgba(255, 255, 255, 0.06);
+
+  --sans-font: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --display-font: 'Outfit', sans-serif;
+  --mono-font: 'JetBrains Mono', monospace;
+
+  /* ─── Golden Ratio Type Scale (φ = 1.618) ─────────────────────────
+   *  Anchor: --text-sm = 0.875rem (14px)
+   *  Each step up   ×  φ  =  × 1.618
+   *  Each step down ÷  φ  =  × 0.618
+   *
+   *  nano  → 0.875 ÷ φ² ≈ 0.334rem  (micro badges)
+   *  xs    → 0.875 ÷ φ  ≈ 0.541rem  → 0.5625rem  (range labels, tiny caps)
+   *  sm    → 0.875rem               → 0.875rem   (form LABELS — uppercase)
+   *  base  → 0.875 × φ  ≈ 1.416rem  → capped at 0.9375rem (input text)
+   *  md    → 0.9375 × φ ≈ 1.516rem  → 1rem       (section sub-headings)
+   *  lg    → 1rem × φ   = 1.618rem  → 1.125rem   (panel titles)
+   *  xl    → 1.125 × φ  ≈ 1.82rem   → 1.375rem   (modal / card headings)
+   *  2xl   → 1.375 × φ  ≈ 2.22rem   → 1.75rem    (brand / hero text)
+   * ──────────────────────────────────────────────────────────────── */
+  --text-nano: 0.6875rem;    /* ~11px  — micro labels, tags (min readable)  */
+  --text-xs:   0.75rem;      /* ~12px  — range labels, badges, hints        */
+  --text-sm:   0.8125rem;    /* ~13px  — form LABELS (UPPERCASE)            */
+  --text-base: 0.9375rem;    /* ~15px  — input values, body                 */
+  --text-md:   1rem;         /* ~16px  — tab labels, sub-headings           */
+  --text-lg:   1.125rem;     /* ~18px  — panel section titles               */
+  --text-xl:   1.375rem;     /* ~22px  — card / modal headings              */
+  --text-2xl:  1.75rem;      /* ~28px  — brand / hero                       */
+
+  /* Golden Ratio Line Heights */
+  --lh-tight:   1.272;   /* √φ  — headings, labels            */
+  --lh-base:    1.618;   /*  φ  — body text, inputs           */
+  --lh-loose:   2.058;   /* φ×√φ — relaxed paragraphs         */
+
+  /* Golden Ratio Letter Spacing */
+  --ls-tight:  -0.02em;  /* headings                          */
+  --ls-normal:  0em;     /* body                              */
+  --ls-wide:    0.05em;  /* sub-headings (φ-spaced caps)      */
+  --ls-widest:  0.12em;  /* form labels (micro UPPERCASE)     */
+
+  /* Golden Ratio Spacing (base = 1rem) */
+  --space-nano: 0.375rem;   /* ~6px  — tightest gap (min usable)  */
+  --space-xs:   0.5rem;     /* ~8px  — micro gaps                 */
+  --space-sm:   0.618rem;   /* ~10px — 1/φ spacing                */
+  --space-md:   1rem;       /* ~16px — base                       */
+  --space-lg:   1.618rem;   /* ~26px — φ spacing                  */
+  --space-xl:   2.618rem;   /* ~42px — φ² spacing                 */
+  --space-2xl:  4.236rem;   /* ~68px — φ³ spacing                 */
+
+  font-family: var(--sans-font);
+  font-size: var(--text-base);
+  line-height: var(--lh-base);
+  color-scheme: dark;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+}
+
+:root[data-theme="light"] {
+  --bg-color: #f8fafc;       /* Even softer light grey-blue (slate-50) */
+  --bg-card: #ffffff;        /* Pure white for containers */
+  --bg-card-hover: #f1f5f9;  /* slate-100 for hovers */
+
+  --text-main: #0f172a;      /* Slate-900 for high readability */
+  --text-muted: #334155;     /* Slate-700 for descriptions */
+  --text-dim: #64748b;       /* Slate-500 */
+
+  --border-color: #e2e8f0;   /* Clean solid borders */
+  --border-color-focus: #2563eb;           /* Clear blue focus */
+
+  --accent-color: #2563eb;   /* Cobalt blue */
+  --accent-gradient: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%); /* Premium cobalt blue gradient */
+  --accent-glow: rgba(37, 99, 235, 0.1);
+
+  --bg-sidebar: #f8fafc;
+  --bg-sidebar-mobile: #ffffff;
+  --bg-overlay: rgba(248, 250, 252, 0.85);
+  --bg-input: #f8fafc;       /* soft grey inputs in light theme */
+  --bg-input-focus: #ffffff; /* pure white on focus */
+  --text-json: #0f766e;
+  --text-code: #b45309;
+  --bg-code: rgba(15, 23, 42, 0.05);
+  --bg-pre: #f1f5f9;
+  --bg-btn-secondary: #f1f5f9;
+  --bg-btn-secondary-hover: #e2e8f0;
+
+  --text-success: #047857;
+  --text-warning: #b45309;
+  --text-danger: #b91c1c;
+
+  --text-on-accent: #ffffff; /* clear white text on cobalt blue background */
+  --accent-border-dashed: rgba(37, 99, 235, 0.3);
+  --bg-hover: rgba(15, 23, 42, 0.06);
+
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
+}
+
+::placeholder {
+  color: var(--text-dim);
+  opacity: 0.8;
+}
+
+:root[data-theme="light"] * {
+  scrollbar-color: rgba(15, 23, 42, 0.12) transparent;
+}
+
+body {
+  overflow: hidden;
+  background-color: var(--bg-color);
+  -webkit-font-smoothing: antialiased;
+  color: var(--text-main);
+}
+
+/* Scrollbars - Ultra thin and borderless */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-dim);
+  opacity: 0.3;
+}
+
+/* Transitions */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes skeletonLoad {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Layout - Full Viewport, Edge-to-Edge */
+.container-layout {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.glow-card {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* ─── Inputs & Form Elements — Golden Ratio Scale ─────────────── */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);        /* φ⁻¹ = 0.618rem gap (label→input) */
+  margin-bottom: var(--space-lg); /* φ    = 1.618rem between groups */
+}
+
+/*
+ * Form Label — step DOWN from base
+ * 0.6875rem (11px) uppercase, widest tracking
+ * Clearly subordinate to the input value at φ× separation
+ */
+.form-label {
+  font-family: var(--display-font);
+  font-size: var(--text-sm);       /* 0.6875rem — 1 φ-step below input */
+  font-weight: 700;
+  line-height: var(--lh-tight);    /* 1.272 — tight for caps */
+  text-transform: uppercase;
+  letter-spacing: var(--ls-widest); /* 0.12em — airy micro caps */
+  color: var(--text-dim);           /* dimmer than before for contrast */
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+/*
+ * Input Fields — the BASE anchor of the scale (0.9375rem / 15px)
+ * Clearly larger than the label; line-height = φ for comfortable reading
+ */
+.input-text, .input-select, .input-textarea {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md); /* 0.618rem × 1rem */
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-main);
+  font-family: var(--sans-font);
+  font-size: var(--text-base);  /* 0.9375rem — anchor of the scale */
+  line-height: var(--lh-base);  /* 1.618 — golden ratio line height */
+  letter-spacing: var(--ls-normal);
+  transition: all 0.15s ease;
+  outline: none;
+}
+
+.input-select option {
+  background-color: var(--bg-card);
+  color: var(--text-main);
+}
+
+.input-text:focus, .input-select:focus, .input-textarea:focus {
+  border-color: var(--accent-color);
+  background: var(--bg-input-focus);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.input-wrapper .input-text {
+  padding-right: 36px;
+}
+
+.btn-clear-input {
+  position: absolute;
+  right: 10px;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.15s ease;
+  user-select: none;
+  z-index: 2;
+}
+
+.btn-clear-input:hover {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.input-textarea {
+  resize: vertical;
+  min-height: calc(var(--text-base) * var(--lh-base) * 4); /* 4 golden lines */
+}
+
+/* CTA Buttons */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-lg);  /* 0.618rem × 1.618rem */
+  background: var(--accent-gradient);
+  color: #08090d;
+  font-family: var(--display-font);
+  font-size: var(--text-sm);    /* 0.6875rem — same level as labels */
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: var(--ls-wide);  /* 0.05em */
+  line-height: var(--lh-tight);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+}
+
+.btn-primary:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.btn-primary:disabled {
+  background: var(--text-dim);
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+  color: var(--bg-color);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: var(--bg-btn-secondary);
+  color: var(--text-main);
+  font-family: var(--display-font);
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-secondary:hover {
+  background: var(--bg-btn-secondary-hover);
+  border-color: var(--border-color);
+}
+
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  background: rgba(0, 240, 255, 0.05);
+  border: 1px solid rgba(0, 240, 255, 0.15);
+  color: var(--accent-color);
+  border-radius: 4px;
+  font-family: var(--mono-font);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* ─── Skeletal Loader — defined once, used everywhere */
+
+/* ─── Markdown Rendering — Golden Ratio Scale ──────────────────── */
+.markdown-content {
+  line-height: var(--lh-base);  /* φ = 1.618 */
+  font-size: var(--text-base);  /* 0.9375rem anchor */
+}
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3 {
+  font-family: var(--display-font);
+  color: var(--text-main);
+  margin-top: var(--space-xl);    /* φ² = 2.618rem */
+  margin-bottom: var(--space-md); /* 1rem */
+  line-height: var(--lh-tight);   /* √φ = 1.272 — tighter for headings */
+  letter-spacing: var(--ls-tight);
+}
+
+/* h1 — 2 φ-steps above base: 0.9375 × φ² ≈ 2.45rem → cap at 1.75rem */
+.markdown-content h1 {
+  font-size: var(--text-2xl);     /* 1.75rem */
+  font-weight: 800;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: var(--space-sm);
+}
+
+/* h2 — 1 φ-step above base: 0.9375 × φ ≈ 1.516rem → --text-xl */
+.markdown-content h2 {
+  font-size: var(--text-xl);      /* 1.375rem */
+  font-weight: 700;
+  color: var(--accent-color);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+  padding-bottom: var(--space-xs);
+}
+
+/* h3 — between base and xl: --text-lg */
+.markdown-content h3 {
+  font-size: var(--text-lg);      /* 1.125rem */
+  font-weight: 600;
+}
+
+/* Paragraphs — base scale */
+.markdown-content p {
+  margin-bottom: var(--space-md);
+  color: var(--text-muted);
+  font-size: var(--text-base);    /* 0.9375rem */
+  line-height: var(--lh-loose);   /* φ×√φ ≈ 2.058 — very readable */
+}
+
+.markdown-content p strong {
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.markdown-content ul,
+.markdown-content ol {
+  margin-bottom: var(--space-md);
+  padding-left: var(--space-lg);  /* φ = 1.618rem */
+}
+
+/* List items — same as body, slightly reduced */
+.markdown-content li {
+  margin-bottom: var(--space-sm);  /* φ⁻¹ = 0.618rem */
+  color: var(--text-muted);
+  font-size: var(--text-base);
+  line-height: var(--lh-base);
+}
+
+/* Code — 1 φ-step below base */
+.markdown-content code {
+  font-family: var(--mono-font);
+  font-size: var(--text-xs);      /* 0.625rem */
+  background: var(--bg-code);
+  padding: 0.1em var(--space-xs);
+  border-radius: 3px;
+  color: var(--text-code);
+}
+
+.markdown-content pre {
+  background: var(--bg-pre);
+  border: 1px solid var(--border-color);
+  padding: var(--space-md);
+  border-radius: 6px;
+  overflow-x: auto;
+  margin-bottom: var(--space-md);
+}
+
+.markdown-content pre code {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  font-size: var(--text-xs);
+  color: var(--text-main);
+}
+
+.markdown-content blockquote {
+  border-left: 3px solid var(--accent-color);
+  background: rgba(0, 240, 255, 0.02);
+  padding: var(--space-sm) var(--space-md);
+  margin-bottom: var(--space-md);
+  border-radius: 0 6px 6px 0;
+}
+
+.markdown-content blockquote p {
+  margin-bottom: 0;
+  font-style: italic;
+  font-size: var(--text-base);
+  color: var(--text-muted);
+}
+
+/* ─── Skeleton loader (shared) ───────────────────────── */
+@keyframes skeletonLoad {
+  0%   { background-position: 100% 50%; }
+  100% { background-position:   0% 50%; }
+}
+
+.skeleton-title {
+  height: 18px;
+  width: 50%;
+  border-radius: 4px;
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0.03) 25%,
+    rgba(255,255,255,0.08) 37%,
+    rgba(255,255,255,0.03) 63%);
+  background-size: 400% 100%;
+  animation: skeletonLoad 1.4s ease infinite;
+  margin-bottom: var(--space-md);
+}
+
+.skeleton-line {
+  height: 11px;
+  border-radius: 3px;
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0.02) 25%,
+    rgba(255,255,255,0.06) 37%,
+    rgba(255,255,255,0.02) 63%);
+  background-size: 400% 100%;
+  animation: skeletonLoad 1.4s ease infinite;
+  margin-bottom: var(--space-sm);
+}

@@ -1,0 +1,18 @@
+{
+  "name": "GenSV — AI Art Direction & Master Brief Studio",
+  "short_name": "GenSV",
+  "description": "Generate structured graphic design briefs and optimized image prompts.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#07080b",
+  "theme_color": "#00f0ff",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#07080b" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- SEO Best Practices -->
+    <title>GenSV — AI Art Direction & Master Design Brief Studio</title>
+    <meta name="description" content="Generate structured graphic design briefs and optimized Midjourney/DALL-E image prompts from raw client data. Driven by Groq Llama 3.3 and Taste-Skill art direction." />
+    <meta name="keywords" content="design brief, AI prompt generator, Midjourney prompt, graphic design, art direction, Groq Llama" />
+    <meta name="author" content="GenSV" />
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((reg) => console.log('ServiceWorker registered:', reg.scope))
+            .catch((err) => console.error('ServiceWorker registration failed:', err));
+        });
+      }
+    </script>
+  </body>
+</html>
