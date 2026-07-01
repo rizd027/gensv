@@ -8,13 +8,13 @@ export const getApiConfig = (customModel = null) => {
     const defaultOrKey = '';
     const key = savedKey ? savedKey : defaultOrKey;
     return {
-      url: 'https://openrouter.ai/api/v1/chat/completions',
+      url: '/api/openrouter',
       key,
       model: selectedModel,
       headers: {
         'Authorization': `Bearer ${key}`,
         'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://gensv.local',
+        'HTTP-Referer': 'https://gensv.vercel.app',
         'X-Title': 'GenSV'
       }
     };
@@ -23,7 +23,7 @@ export const getApiConfig = (customModel = null) => {
     const defaultGroqKey = '';
     const key = savedKey && !savedKey.startsWith('sk-or-') ? savedKey : defaultGroqKey;
     return {
-      url: '/api-groq/openai/v1/chat/completions',
+      url: '/api/groq',
       key,
       model: selectedModel,
       headers: {

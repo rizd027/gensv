@@ -41,6 +41,58 @@ export default defineConfig({
               'x-ratelimit-limit-tokens, x-ratelimit-remaining-tokens, x-ratelimit-limit-requests, x-ratelimit-remaining-requests, x-ratelimit-reset-tokens, x-ratelimit-reset-requests';
           });
         }
+      },
+      '/api/groq': {
+        target: 'https://api.groq.com',
+        changeOrigin: true,
+        rewrite: (path) => '/openai/v1/chat/completions',
+        configure: (proxy, options) => {
+          proxy.on('proxyReq', (proxyReq, req, res) => {
+            const auth = req.headers.authorization;
+            if (!auth || auth === 'Bearer ') {
+              const key = process.env.GROQ_API_KEY || '';
+              if (key) {
+                proxyReq.setHeader('Authorization', `Bearer ${key}`);
+              }
+            }
+          });
+          proxy.on('proxyRes', (proxyRes, req, res) => {
+            proxyRes.headers['access-control-expose-headers'] = 
+              'x-ratelimit-limit-tokens, x-ratelimit-remaining-tokens, x-ratelimit-limit-requests, x-ratelimit-remaining-requests, x-ratelimit-reset-tokens, x-ratelimit-reset-requests';
+          });
+        }
+      },
+      '/api/openrouter': {
+        target: 'https://openrouter.ai',
+        changeOrigin: true,
+        rewrite: (path) => '/api/v1/chat/completions',
+        configure: (proxy, options) => {
+          proxy.on('proxyReq', (proxyReq, req, res) => {
+            const auth = req.headers.authorization;
+            if (!auth || auth === 'Bearer ') {
+              const key = process.env.OPENROUTER_API_KEY || '';
+              if (key) {
+                proxyReq.setHeader('Authorization', `Bearer ${key}`);
+              }
+            }
+          });
+        }
+      },
+      '/api/openrouter-key': {
+        target: 'https://openrouter.ai',
+        changeOrigin: true,
+        rewrite: (path) => '/api/v1/key',
+        configure: (proxy, options) => {
+          proxy.on('proxyReq', (proxyReq, req, res) => {
+            const auth = req.headers.authorization;
+            if (!auth || auth === 'Bearer ') {
+              const key = process.env.OPENROUTER_API_KEY || '';
+              if (key) {
+                proxyReq.setHeader('Authorization', `Bearer ${key}`);
+              }
+            }
+          });
+        }
       }
     }
   }

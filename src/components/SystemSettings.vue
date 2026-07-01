@@ -230,7 +230,7 @@ const checkGroqLimit = async () => {
   
   // 1. Try local dev server proxy first to bypass browser CORS headers restriction
   try {
-    res = await fetch('/api-groq/openai/v1/chat/completions', {
+    res = await fetch('/api/groq', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${keyToTest}`,
@@ -335,16 +335,40 @@ const checkOpenRouterLimit = async () => {
   const keyToTest = openrouterKey.value.trim() || DEFAULT_OPENROUTER_KEY;
   const startTime = Date.now();
   
+  let res;
   try {
-    const res = await fetch('https://openrouter.ai/api/v1/key', {
+    res = await fetch('/api/openrouter-key', {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${keyToTest}`
       }
     });
-    
-    const latency = Date.now() - startTime;
-    
+    if (res.status === 404) {
+      throw new Error('Proxy not found');
+    }
+  } catch (proxyErr) {
+    console.warn('OpenRouter key proxy not available, falling back to direct API fetch:', proxyErr);
+    try {
+      res = await fetch('https://openrouter.ai/api/v1/key', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${keyToTest}`
+        }
+      });
+    } catch (directErr) {
+      console.error('OpenRouter direct API fetch failed:', directErr);
+      orStatus.value = {
+        isError: true,
+        msg: `Gagal: ${directErr.message || 'Koneksi jaringan gagal'}`
+      };
+      checkingOR.value = false;
+      return;
+    }
+  }
+  
+  const latency = Date.now() - startTime;
+  
+  try {
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       throw new Error(err?.error?.message || `HTTP ${res.status}`);
