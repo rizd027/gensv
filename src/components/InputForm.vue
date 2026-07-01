@@ -595,7 +595,7 @@ defineExpose({
   flex-direction: column;
   padding: var(--space-md) 0;
   gap: var(--space-md);
-  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  /* transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1); */
   overflow-y: auto;
   overflow-x: hidden;
   -ms-overflow-style: none;  /* IE and Edge */
@@ -618,7 +618,7 @@ defineExpose({
   gap: 10px;
   padding: 0 18px; /* Perfectly centered logo when collapsed */
   margin-bottom: var(--space-xs);
-  transition: padding 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  /* transition: padding 0.3s cubic-bezier(0.16, 1, 0.3, 1); */
 }
 
 .form-side-nav:hover .nav-header {
@@ -652,7 +652,7 @@ defineExpose({
   text-transform: uppercase;
   white-space: nowrap;
   opacity: 0;
-  transition: opacity 0.2s ease;
+  /* transition: opacity 0.2s ease; */
 }
 
 .form-side-nav:hover .nav-header-title {
@@ -687,7 +687,7 @@ defineExpose({
   display: flex;
   align-items: center;
   gap: 10px;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background 0.15s ease, color 0.15s ease;
   position: relative;
   overflow: hidden;
   white-space: nowrap;
@@ -733,7 +733,7 @@ defineExpose({
 
 .nav-menu-btn .btn-text {
   opacity: 0;
-  transition: opacity 0.2s ease;
+  /* transition: opacity 0.2s ease; */
   white-space: nowrap;
 }
 
@@ -1537,7 +1537,7 @@ defineExpose({
   opacity: 0;
   pointer-events: none;
   visibility: hidden;
-  transition: opacity 0.25s ease, visibility 0.25s ease;
+  /* transition: opacity 0.25s ease, visibility 0.25s ease; */
   padding: 0 12px;
   margin-top: auto;
   display: flex;
@@ -1758,7 +1758,7 @@ defineExpose({
     background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(4px);
     z-index: 140;
-    animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    /* animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards; */
   }
   
   /* Menu Trigger Buttons */
@@ -1813,7 +1813,7 @@ defineExpose({
     border-bottom: none !important;
     z-index: 150 !important;
     transform: translateX(-100%);
-    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    transition: none !important;
     display: flex !important;
     flex-direction: column !important;
     padding: var(--space-md) 0 !important;
