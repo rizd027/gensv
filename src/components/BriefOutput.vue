@@ -656,6 +656,15 @@ const copyPromptFinal = () => {
   overflow: hidden;
 }
 
+.output-wrapper-full {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+
 /* ─── Header ────────────────────────────────────────────── */
 .output-header {
   flex-shrink: 0;

@@ -643,3 +643,96 @@ export const webExtraLibOptions = [
   'ApexCharts / Chart.js',
   'Lucide Icons / Heroicons'
 ];
+
+export const appFrameworkOptions = [
+  { label: 'Flutter (Dart - Cross-Platform)', value: 'Flutter' },
+  { label: 'React Native / Expo (JS/TS)', value: 'React Native / Expo' },
+  { label: 'Swift (Native iOS)', value: 'Swift (iOS)' },
+  { label: 'Kotlin (Native Android)', value: 'Kotlin (Android)' },
+  { label: 'Ionic / Capacitor (Web Native)', value: 'Ionic / Capacitor' },
+  { label: 'Svelte Native (Experimental)', value: 'Svelte Native' }
+];
+
+export const appBackendOptions = [
+  { label: 'Supabase Serverless (No Backend Code)', value: 'Supabase Serverless' },
+  { label: 'Firebase BaaS (Google Serverless)', value: 'Firebase BaaS' },
+  { label: 'Node.js + Fastify (Sangat Cepat)', value: 'Node.js + Fastify' },
+  { label: 'Node.js + Express (Standard)', value: 'Node.js + Express' },
+  { label: 'Golang + Fiber/Gin (Performa Tinggi)', value: 'Golang + Fiber/Gin' },
+  { label: 'Python + FastAPI (AI/Data friendly)', value: 'Python + FastAPI' },
+  { label: 'None (Standalone Offline App)', value: 'None' }
+];
+
+export const appDatabaseOptions = [
+  { label: 'SQLite (Local Relational)', value: 'SQLite' },
+  { label: 'Hive (Flutter Local NoSQL)', value: 'Hive' },
+  { label: 'Realm (NoSQL Local)', value: 'Realm' },
+  { label: 'Supabase PostgreSQL (Cloud)', value: 'Supabase (PostgreSQL)' },
+  { label: 'Firebase Firestore (Cloud)', value: 'Firebase Firestore' },
+  { label: 'None (No Local/Cloud Database)', value: 'None' }
+];
+
+export const appStorageOptions = [
+  { label: 'Supabase Storage (Auth terintegrasi)', value: 'Supabase Storage' },
+  { label: 'Firebase Storage (Google Integration)', value: 'Firebase Storage' },
+  { label: 'AWS S3 (Standard Global)', value: 'AWS S3' },
+  { label: 'Cloudinary (Optimized Media)', value: 'Cloudinary' },
+  { label: 'Local Device Storage (Internal)', value: 'Local Storage' }
+];
+
+export const appUiKitOptions = [
+  { label: 'Material Design 3 (Android/Flutter Standard)', value: 'Material Design 3' },
+  { label: 'Cupertino Widgets (iOS Native style)', value: 'Cupertino Widgets' },
+  { label: 'Tailwind RN (React Native utilities)', value: 'Tailwind RN' },
+  { label: 'React Native Paper (Material design)', value: 'React Native Paper' },
+  { label: 'NativeBase (Unstyled RN components)', value: 'NativeBase' },
+  { label: 'Custom Native UI (Platform specific)', value: 'Custom Native UI' }
+];
+
+export const appStateOptions = [
+  { label: 'Bloc / Cubit (Flutter Standard)', value: 'Bloc' },
+  { label: 'Riverpod (Flutter Modern)', value: 'Riverpod' },
+  { label: 'Zustand (React Native)', value: 'Zustand' },
+  { label: 'Redux Toolkit (React Native)', value: 'Redux Toolkit' },
+  { label: 'MobX (Reactive)', value: 'MobX' },
+  { label: 'Svelte Stores', value: 'Svelte Stores' },
+  { label: 'None (Simple State)', value: 'None' }
+];
+
+export const appFeatureOptions = [
+  'Biometric Authentication (FaceID/Fingerprint)',
+  'Push Notifications (FCM/APNS)',
+  'In-App Purchase (IAP) & Subscription',
+  'Offline Sync & Local Cache',
+  'Camera & Gallery Access',
+  'Location Services & GPS Map',
+  'Bluetooth / NFC Scan',
+  'OAuth Social Login (Google/Apple)',
+  'Deep Linking & Share Extension'
+];
+
+export const appUiPrinciples = [
+  'Native Gesture Navigation',
+  'Micro-interactions & Haptic Feedbacks',
+  'Adaptive Dark Mode',
+  'Flat Minimalist UI',
+  'Custom Splash Screen',
+  'One-Hand Usability (Thumb Zone)',
+  'Skeleton Loaders'
+];
+
+export const appExtraLibOptions = [
+  'Sentry (Crash Reporting)',
+  'Lottie (Animations)',
+  'Local Authentication (Security)',
+  'Firebase Analytics',
+  'SQLite / Drift (Local database)',
+  'Mapbox SDK (Custom maps)'
+];
+
+export const targetPlatformOptions = [
+  { label: 'Universal (Android & iOS)', value: 'Universal' },
+  { label: 'Android Only (APK/AAB)', value: 'Android' },
+  { label: 'iOS Only (IPA)', value: 'iOS' }
+];
+

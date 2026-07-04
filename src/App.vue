@@ -4,7 +4,7 @@
     <header class="app-header">
       <div class="header-brand">
         <!-- Hamburger Menu Toggle Button (Visible only on mobile) -->
-        <button type="button" class="btn-menu-toggle" @click="inputFormRef ? inputFormRef.isSideNavOpen = true : null" aria-label="Open menu">
+        <button v-if="activeMobileTab !== 'output'" type="button" class="btn-menu-toggle" @click="inputFormRef ? inputFormRef.isSideNavOpen = true : null" aria-label="Open menu">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="3" y1="12" x2="21" y2="12"></line>
             <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -25,14 +25,19 @@
         <button 
           type="button" 
           class="btn-toggle-output-header" 
-          :class="{ active: isOutputActive }" 
+          :class="{ active: isOutputActive, loading: loading }" 
           @click="toggleOutput" 
-          title="Toggle Brief Output"
+          :title="isOutputActive ? 'Sembunyikan Output' : 'Tampilkan Output'"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tab-icon">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          <!-- Spinner icon if loading -->
+          <span class="loader-spinner button-spinner" v-if="loading"></span>
+          <svg v-else xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tab-icon">
+            <!-- If output is active, show split/close icon (X), otherwise show chat bubble -->
+            <line v-if="isOutputActive" x1="18" y1="6" x2="6" y2="18"></line>
+            <line v-if="isOutputActive" x1="6" y1="6" x2="18" y2="18"></line>
+            <path v-else d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
           </svg>
-          <span class="btn-text">Brief Output</span>
+          <span class="btn-text">{{ toggleButtonText }}</span>
           <span v-if="loading && !isOutputActive" class="pulse-dot-btn"></span>
         </button>
       </div>
@@ -169,6 +174,16 @@ const isOutputActive = computed(() => {
     return activeMobileTab.value === 'output';
   }
   return !isOutputCollapsed.value;
+});
+
+const toggleButtonText = computed(() => {
+  if (loading.value) {
+    return 'Memproses...';
+  }
+  if (isMobile.value) {
+    return activeMobileTab.value === 'output' ? 'Close Output' : 'Open Output';
+  }
+  return isOutputCollapsed.value ? 'Open Output' : 'Close Output';
 });
 
 const toggleOutput = () => {
@@ -322,6 +337,13 @@ const generateBrief = async (formData) => {
   background: var(--accent-glow);
   border-color: var(--accent-color);
   box-shadow: 0 0 10px var(--accent-glow);
+}
+
+.btn-toggle-output-header .button-spinner {
+  width: 14px;
+  height: 14px;
+  border-width: 1.5px;
+  margin-right: 4px;
 }
 
 .btn-toggle-output-header .pulse-dot-btn {

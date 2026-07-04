@@ -10,6 +10,21 @@ const fetchAI = async (body, options = {}) => {
   });
 };
 
+const parseAIResponse = (content) => {
+  let ai = {};
+  try {
+    let rawContent = (content || '').trim();
+    if (rawContent.startsWith('```')) {
+      rawContent = rawContent.replace(/^```[a-zA-Z]*\s*/, '').replace(/\s*```$/, '').trim();
+    }
+    ai = JSON.parse(rawContent);
+  } catch (err) {
+    console.error('Failed to parse AI JSON response:', err);
+    ai = {};
+  }
+  return ai;
+};
+
 const gcd = (a, b) => b ? gcd(b, a % b) : a;
 
 const simplifyRatio = (w, h) => {
@@ -861,13 +876,13 @@ Special Instructions: ${instruksi || 'none'}`;
   }
 
   const data = await response.json();
-  const ai = JSON.parse(data.choices[0].message.content || '{}');
+  const ai = parseAIResponse(data.choices[0].message.content);
 
   const mjVersion = formData.mjVersion || '--v 6.0';
   const arRatio = getArRatio(dimensi, null, orientasi, mjVersion);
   const arParam = mjVersion === 'dalle' ? '' : `--ar ${arRatio}`;
 
-  let promptBase = (ai.prompt_final || '').trim();
+  let promptBase = (ai.prompt_final || ai.promptFinal || ai.prompt || ai.prompt_akhir || '').trim();
   if (mjVersion === 'dalle') {
     promptBase = promptBase
       .replace(/--ar\s+\S+/g, '')
@@ -890,12 +905,15 @@ Special Instructions: ${instruksi || 'none'}`;
     promptFinal = `${promptBase}, professional studio photography, realistic face profile, clean professional grade, ${arParam} ${mjParams}`.replace(/,\s*,/g, ',').replace(/\s+/g, ' ').trim();
   }
 
+  // Clean double punctuation if promptBase ended with a dot or comma
+  promptFinal = promptFinal.replace(/\.,/g, ',').replace(/,,/g, ',');
+
   const jsonBlock = {
-    mood:            ai.mood            || 'Formal portrait photo',
-    resolusi:        dimensi || ai.resolusi || 'Print-ready resolution',
+    mood:            ai.mood            || ai.mood_vibe || 'Formal portrait photo',
+    resolusi:        dimensi || ai.resolusi || ai.resolution || 'Print-ready resolution',
     format_output:   'PNG / JPEG High Quality',
     kualitas_cetak:  'High-Definition Photo Print',
-    negative_prompt: ai.negative_prompt || ["mockup", "3d render", "cartoon", "blurry"],
+    negative_prompt: ai.negative_prompt || ai.negativePrompt || ["mockup", "3d render", "cartoon", "blurry"],
   };
 
   const briefStr = [
@@ -903,12 +921,12 @@ Special Instructions: ${instruksi || 'none'}`;
     `**Nama Subjek:** ${namaSubjek}`,
     `**Kategori:** ${tipeFoto} (${genderUsia})`,
     '',
-    `${ai.konsep_visual || 'Foto potret wajah dengan pencahayaan dan pose yang profesional.'}`,
+    `${ai.konsep_visual || ai.konsepVisual || 'Foto potret wajah dengan pencahayaan dan pose yang profesional.'}`,
     '',
     `## 2. PENGATURAN STUDIO & GAYA`,
-    `**Pakaian/Attire:** ${ai.pakaian_style || pakaian}`,
-    `**Pencahayaan:** ${ai.pencahayaan || 'Soft studio lighting'}`,
-    `**Kamera & Lensa:** ${ai.kamera_lensa || 'Portrait lens 85mm'}`,
+    `**Pakaian/Attire:** ${ai.pakaian_style || ai.pakaianStyle || pakaian}`,
+    `**Pencahayaan:** ${ai.pencahayaan || ai.lighting || 'Soft studio lighting'}`,
+    `**Kamera & Lensa:** ${ai.kamera_lensa || ai.kameraLensa || 'Portrait lens 85mm'}`,
     '',
     `## 3. PROMPT AI IMAGE GENERATOR`,
     '```json',
@@ -1020,13 +1038,13 @@ Special Instructions: ${instruksi || 'none'}`;
   }
 
   const data = await response.json();
-  const ai = JSON.parse(data.choices[0].message.content || '{}');
+  const ai = parseAIResponse(data.choices[0].message.content);
 
   const mjVersion = formData.mjVersion || '--v 6.0';
   const arRatio = getArRatio(dimensi, null, orientasi, mjVersion);
   const arParam = mjVersion === 'dalle' ? '' : `--ar ${arRatio}`;
 
-  let promptBase = (ai.prompt_final || '').trim();
+  let promptBase = (ai.prompt_final || ai.promptFinal || ai.prompt || ai.prompt_akhir || '').trim();
   if (mjVersion === 'dalle') {
     promptBase = promptBase
       .replace(/--ar\s+\S+/g, '')
@@ -1069,12 +1087,15 @@ Special Instructions: ${instruksi || 'none'}`;
     promptFinal = `${promptBase}, flat 2D high-fidelity UI design layout, 100% full-bleed UI screenshot, direct screen capture view, pure interface graphic, flat digital design file, ${edgeInstruction} The background of the entire image canvas is a single continuous design surface with no outer frame or borders. All elements are integrated directly on this flat canvas surface, ${arParam} ${mjParams}`.replace(/,\s*,/g, ',').replace(/\s+/g, ' ').trim();
   }
 
+  // Clean double punctuation if promptBase ended with a dot or comma
+  promptFinal = promptFinal.replace(/\.,/g, ',').replace(/,,/g, ',');
+
   const jsonBlock = {
-    mood:            ai.mood            || 'Clean UI/UX interface',
-    resolusi:        dimensi || ai.resolusi || '1920x1080 px',
+    mood:            ai.mood            || ai.mood_vibe || 'Clean UI/UX interface',
+    resolusi:        dimensi || ai.resolusi || ai.resolution || '1920x1080 px',
     format_output:   'Figma Design / High-fidelity Screen export',
     kualitas_cetak:  'Web/Mobile Screen Ready',
-    negative_prompt: ai.negative_prompt || ["laptop", "monitor", "perspective mockup", "physical devais"],
+    negative_prompt: ai.negative_prompt || ai.negativePrompt || ["laptop", "monitor", "perspective mockup", "physical devais"],
   };
 
   const briefStr = [
@@ -1082,13 +1103,13 @@ Special Instructions: ${instruksi || 'none'}`;
     `**Aplikasi:** ${namaAplikasi}`,
     `**Tipe Interface:** ${jenisUI}`,
     '',
-    `${ai.layout_desc || 'Tata letak antarmuka 2D flat dengan komponen digital yang bersih.'}`,
+    `${ai.layout_desc || ai.layoutDesc || ai.konsep_visual || ai.konsepVisual || 'Tata letak antarmuka 2D flat dengan komponen digital yang bersih.'}`,
     '',
     `## 2. DESIGN SYSTEM & IDENTITAS`,
     `**Tema Desain:** ${temaDesain}`,
-    `**Palet Warna:** ${ai.palet_warna || warna}`,
-    `**Tipografi:** ${ai.typography || 'Clean modern sans-serif'}`,
-    `**Komponen UI:** ${ai.ui_elements || 'Buttons, Cards, Inputs'}`,
+    `**Palet Warna:** ${ai.palet_warna || ai.paletWarna || ai.warna || warna}`,
+    `**Tipografi:** ${ai.typography || ai.tipografi || ai.font || 'Clean modern sans-serif'}`,
+    `**Komponen UI:** ${ai.ui_elements || ai.uiElements || ai.elemen_desain || ai.elemenDesain || 'Buttons, Cards, Inputs'}`,
     '',
     `## 3. PROMPT AI IMAGE GENERATOR`,
     '```json',
@@ -1202,13 +1223,13 @@ Special Instructions: ${instruksi || 'none'}`;
   }
 
   const data = await response.json();
-  const ai = JSON.parse(data.choices[0].message.content || '{}');
+  const ai = parseAIResponse(data.choices[0].message.content);
 
   const mjVersion = formData.mjVersion || '--v 6.0';
   const arRatio = getArRatio(dimensi, null, orientasi, mjVersion);
   const arParam = mjVersion === 'dalle' ? '' : `--ar ${arRatio}`;
 
-  let promptBase = (ai.prompt_final || '').trim();
+  let promptBase = (ai.prompt_final || ai.promptFinal || ai.prompt || ai.prompt_akhir || '').trim();
   if (mjVersion === 'dalle') {
     promptBase = promptBase
       .replace(/--ar\s+\S+/g, '')
@@ -1231,12 +1252,15 @@ Special Instructions: ${instruksi || 'none'}`;
     promptFinal = `${promptBase}, Commercial studio product photography, clean professional studio setting, realistic texture rendering, detailed lighting, ${arParam} ${mjParams}`.replace(/,\s*,/g, ',').replace(/\s+/g, ' ').trim();
   }
 
+  // Clean double punctuation if promptBase ended with a dot or comma
+  promptFinal = promptFinal.replace(/\.,/g, ',').replace(/,,/g, ',');
+
   const jsonBlock = {
-    mood:            ai.mood            || 'Luxury product photography',
-    resolusi:        dimensi || ai.resolusi || '1080x1080 px',
+    mood:            ai.mood            || ai.mood_vibe || 'Luxury product photography',
+    resolusi:        dimensi || ai.resolusi || ai.resolution || '1080x1080 px',
     format_output:   'High-resolution JPG / PNG',
     kualitas_cetak:  'E-Commerce Storefront Ready',
-    negative_prompt: ai.negative_prompt || ["mockup", "text", "crooked", "drawing"],
+    negative_prompt: ai.negative_prompt || ai.negativePrompt || ["mockup", "text", "crooked", "drawing"],
   };
 
   const briefStr = [
@@ -1244,13 +1268,13 @@ Special Instructions: ${instruksi || 'none'}`;
     `**Nama Produk:** ${namaProduk}`,
     `**Komposisi:** ${gayaKomposisi}`,
     '',
-    `${ai.komposisi_podium || 'Foto studio komersial dengan podium marmer and air tenang.'}`,
+    `${ai.komposisi_podium || ai.komposisiPodium || ai.konsep_visual || ai.konsepVisual || 'Foto studio komersial dengan podium marmer and air tenang.'}`,
     '',
     `## 2. DETAIL ART DIRECTION STUDIO`,
     `**Elemen Studio:** ${elemenStudio}`,
-    `**Pencahayaan:** ${ai.pencahayaan || pencahayaan}`,
-    `**Tekstur Material:** ${ai.tekstur_material || 'Frosted glass, stone, water'}`,
-    `**Palet Warna:** ${ai.palet_warna || warna}`,
+    `**Pencahayaan:** ${ai.pencahayaan || ai.lighting || pencahayaan}`,
+    `**Tekstur Material:** ${ai.tekstur_material || ai.teksturMaterial || 'Frosted glass, stone, water'}`,
+    `**Palet Warna:** ${ai.palet_warna || ai.paletWarna || ai.warna || warna}`,
     '',
     `## 3. PROMPT AI IMAGE GENERATOR`,
     '```json',
@@ -1359,22 +1383,15 @@ The JSON must have EXACTLY these keys:
   const data = await response.json();
   const rawContent = data.choices?.[0]?.message?.content || '';
 
-  // Robust JSON extractor — handles model wrapping output in markdown fences
-  let ai = {};
-  try {
-    ai = JSON.parse(rawContent);
-  } catch {
-    const match = rawContent.match(/\{[\s\S]*\}/);
-    if (match) {
-      try { ai = JSON.parse(match[0]); } catch { /* ignore */ }
-    }
-  }
+  // Use parseAIResponse for robust parsing
+  const ai = parseAIResponse(rawContent);
 
-  if (!ai.prompt_final) {
+  const promptBaseKey = ai.prompt_final || ai.promptFinal || ai.prompt || ai.prompt_akhir;
+  if (!promptBaseKey) {
     throw new Error('Model tidak menghasilkan prompt. Coba lagi atau ganti gambar.');
   }
 
-  let promptBase = (ai.prompt_final || '').trim();
+  let promptBase = promptBaseKey.trim();
   if (mjVersion === 'dalle') {
     promptBase = promptBase
       .replace(/--ar\s+\S+/g, '')
@@ -1394,12 +1411,15 @@ The JSON must have EXACTLY these keys:
     promptFinal = `${promptBase} ${mjParams}`.replace(/,\s*,/g, ',').replace(/\s+/g, ' ').trim();
   }
 
+  // Clean double punctuation if promptBase ended with a dot or comma
+  promptFinal = promptFinal.replace(/\.,/g, ',').replace(/,,/g, ',');
+
   const jsonBlock = {
-    mood:            ai.mood            || 'Sesuai gambar referensi',
-    resolusi:        ai.resolusi        || 'Sesuai target output',
+    mood:            ai.mood            || ai.mood_vibe || 'Sesuai gambar referensi',
+    resolusi:        ai.resolusi        || ai.resolution || 'Sesuai target output',
     format_output:   mjVersion === 'dalle' ? 'PNG / JPG' : 'Midjourney Render',
     kualitas_cetak:  'High-Quality replication',
-    negative_prompt: Array.isArray(ai.negative_prompt) ? ai.negative_prompt : ['mockup', 'text', 'lowres', 'blurry'],
+    negative_prompt: Array.isArray(ai.negative_prompt || ai.negativePrompt) ? (ai.negative_prompt || ai.negativePrompt) : ['mockup', 'text', 'lowres', 'blurry'],
   };
 
   const briefStr = [
@@ -1407,12 +1427,10 @@ The JSON must have EXACTLY these keys:
     `**Nama File:** ${imageName}`,
     `**Target Gaya Prompt:** ${targetOutput}`,
     '',
-    `${ai.analisis_gambar || 'AI Vision telah memindai gambar referensi.'}`,
-    '',
     `## 2. DETAIL ART DIRECTION REPLIKASI`,
-    `**Pencahayaan & Warna:** ${ai.pencahayaan_warna || 'Terdeteksi dari gambar.'}`,
-    `**Tata Letak & Komposisi:** ${ai.komposisi_layout || 'Terdeteksi dari gambar.'}`,
-    `**Gaya Grafis / Estetika:** ${ai.gaya_estetika || 'Terdeteksi dari gambar.'}`,
+    `**Pencahayaan & Warna:** ${ai.pencahayaan_warna || ai.pencahayaanWarna || 'Terdeteksi dari gambar.'}`,
+    `**Tata Letak & Komposisi:** ${ai.komposisi_layout || ai.komposisiLayout || 'Terdeteksi dari gambar.'}`,
+    `**Gaya Grafis / Estetika:** ${ai.gaya_estetika || ai.gayaEstetika || 'Terdeteksi dari gambar.'}`,
     `**Instruksi Kustom:** ${instruksi || 'Tidak ada'}`,
     '',
     `## 3. PROMPT AI IMAGE GENERATOR`,
@@ -1518,14 +1536,14 @@ Additional Instructions: "${instruksi || 'none'}"`;
   }
 
   const data = await response.json();
-  const ai = JSON.parse(data.choices[0].message.content || '{}');
+  const ai = parseAIResponse(data.choices[0].message.content);
 
   const jsonBlock = {
-    mood:            ai.mood            || `${namaProject} web application`,
-    resolusi:        ai.resolusi        || 'Responsive web (Desktop & Mobile)',
+    mood:            ai.mood            || ai.mood_vibe || `${namaProject} web application`,
+    resolusi:        ai.resolusi        || ai.resolution || 'Responsive web (Desktop & Mobile)',
     format_output:   'Fully Functional Code Scaffold / Deployment Ready',
     kualitas_cetak:  'Vibe Coding Grade (Cursor/Bolt.new ready)',
-    negative_prompt: ai.negative_prompt || ["heavy packages", "jquery", "bloated CSS", "slow transitions"],
+    negative_prompt: ai.negative_prompt || ai.negativePrompt || ["heavy packages", "jquery", "bloated CSS", "slow transitions"],
   };
 
   const briefStr = [
@@ -1533,24 +1551,24 @@ Additional Instructions: "${instruksi || 'none'}"`;
     `**Tagline:** ${subjudul} — *"${slogan}"*`,
     '',
     `## 1. DOKUMEN PRD & SRS (SPESIFIKASI)`,
-    `${ai.prd_srs || 'PRD dan SRS belum tersedia.'}`,
+    `${ai.prd_srs || ai.prdSrs || ai.prd || 'PRD dan SRS belum tersedia.'}`,
     '',
     `## 2. ARSITEKTUR & DESAIN SISTEM (SDD)`,
     `**Tech Stack:** ${techStack} (Frontend), ${backendTech} (Backend)`,
     `**Database & Auth:** ${databaseTech} | **Media Storage:** ${mediaStorage}`,
     `**UI Kit:** ${uiKit} | **State & Data:** ${stateManagement}`,
     '',
-    `${ai.architecture_sdd || 'SDD belum tersedia.'}`,
+    `${ai.architecture_sdd || ai.architectureSdd || ai.architecture || 'SDD belum tersedia.'}`,
     '',
     `## 3. UI/UX & PANDUAN ESTETIKA VISUAL`,
     `**Fitur Utama:** ${fiturUtama.join(', ')}`,
     `**Prinsip Desain:** ${prinsipUI.join(', ')}`,
     `**Library Ekstra:** ${libraryTambahan.join(', ')}`,
     '',
-    `${ai.uiux_aesthetics || 'UI/UX Aesthetics belum tersedia.'}`,
+    `${ai.uiux_aesthetics || ai.uiuxAesthetics || 'UI/UX Aesthetics belum tersedia.'}`,
     '',
     `## 4. CHECKLIST OPERASIONAL & TASK BREAKDOWN`,
-    `${ai.task_breakdown || 'Task Breakdown belum tersedia.'}`,
+    `${ai.task_breakdown || ai.taskBreakdown || 'Task Breakdown belum tersedia.'}`,
     '',
     `## 5. PROMPT CODE AI SCATTER (CURSOR / BOLT.NEW / V0.DEV)`,
     '```json',
@@ -1562,25 +1580,718 @@ Additional Instructions: "${instruksi || 'none'}"`;
     brief: briefStr,
     promptData: {
       ...jsonBlock,
-      prompt_final: ai.prompt_final || 'No prompt generated.'
+      prompt_final: ai.prompt_final || ai.promptFinal || ai.prompt || ai.prompt_akhir || 'No prompt generated.'
+    }
+  };
+};
+
+export const generateAppGenBrief = async (formData, signal) => {
+  const { model } = getApiConfig();
+
+  const namaApp         = formData.namaApp || 'Nusantara App';
+  const subjudul        = formData.subjudul || 'Layanan Digital';
+  const slogan          = formData.slogan || 'Mudah dan Cepat';
+  const deskripsi       = formData.deskripsi || '';
+  const techStack       = formData.techStack || 'Flutter';
+  const backendTech     = formData.backendTech || 'Supabase Serverless';
+  const databaseTech    = formData.databaseTech || 'SQLite';
+  const mediaStorage    = formData.mediaStorage || 'Local Storage';
+  const uiKit           = formData.uiKit || 'Material Design 3';
+  const stateManagement = formData.stateManagement || 'Bloc';
+  const fiturUtama      = formData.fiturUtama || [];
+  const prinsipUI       = formData.prinsipUI || [];
+  const libraryTambahan = formData.libraryTambahan || [];
+  const targetPlatform  = formData.targetPlatform || 'Universal';
+  const instruksi       = formData.instruksi || '';
+
+  const systemPrompt = `[ROLE / PERSONA]
+You are a senior Mobile App Architect, Product Manager, and Lead Mobile Developer. You specialize in "Vibe Coding" where mobile apps are created using AI tools (Cursor, Expo CLI, Flutter CLI) under developer orchestration.
+
+[CONTEXT]
+You are creating a comprehensive, high-quality mobile application implementation brief and code scaffold prompt. The brief serves as the source of truth (PRD, SRS, SDD, UI/UX Guidelines, Tasks list, and Final developer scaffold instructions).
+
+[TASK]
+Analyze the app details and mobile technical choices. Produce a detailed implementation roadmap and structure as a valid JSON object.
+
+[INSTRUCTION]
+1. Return ONLY a single, valid JSON object containing the technical roadmap and brief details. Use exact specified keys.
+2. In 'prompt_final', provide a very detailed English developer prompt that can be pasted directly into Cursor, Expo CLI, or Flutter CLI to bootstrap and code the mobile application.
+
+[PARAMETERS / CONSTRAINTS]
+1. Output format MUST be a single, valid JSON object only. Do NOT include markdown code blocks, explanation, or extra characters.
+2. All descriptions, prd_srs, architecture_sdd, uiux_aesthetics, and task_breakdown must be in Indonesian.
+3. The 'prompt_final' value MUST be in English.
+4. Integrate native mobile UI principles: gesture navigation, micro-interactions, haptic feedback, adaptive dark mode, skeleton loaders, and thumb zone optimization (controls at bottom of screen).
+5. In 'architecture_sdd', output a folder structure consistent with standard Flutter/React Native templates, local database schema details, and native bridge configurations.
+
+[EXECUTION]
+Now, process the following input data and generate the JSON object:
+Respond ONLY with a valid JSON object with EXACTLY these keys:
+{
+  "mood": "short aesthetic summary of the app vibe and visual mood in Indonesian",
+  "resolusi": "target mobile devices and build package details (APK/IPA) in Indonesian",
+  "prd_srs": "detailed product requirements and specifications (Indonesian, describing App Goal, Target Users, Feature Details, Native Hardware Permission, and Mobile Business Rules)",
+  "architecture_sdd": "detailed mobile system design (Indonesian, describing Mobile Architecture style, local SQLite/Hive database schema design, Folder structure, API/BaaS integration flow, and state management flow)",
+  "uiux_aesthetics": "detailed UI/UX mobile styling principles (Indonesian, describing Color palette, Typography, Adaptive dark/light mode implementation, haptic feedback triggers, and Thumb Zone accessibility)",
+  "task_breakdown": "step-by-step checklist of MVP mobile development tasks (Indonesian, structured logically from day 1, native configuration, to build release APK/IPA)",
+  "prompt_final": "a comprehensive, highly detailed English prompt to feed into code generators (Cursor, Expo CLI, Flutter CLI) to generate the code for this app",
+  "negative_prompt": ["unwanted items in code generation, e.g. heavy web libraries, jquery, desktop frameworks, non-responsive css"]
+}`;
+
+  const userPrompt = `[INPUT DETAILS]
+App Name: "${namaApp}"
+Tagline/Subjudul: "${subjudul}"
+Slogan: "${slogan}"
+Description: "${deskripsi}"
+Mobile Framework: "${techStack}"
+Backend/BaaS Tech: "${backendTech}"
+Local Database: "${databaseTech}"
+Media & Cloud Storage: "${mediaStorage}"
+Native UI Kit Style: "${uiKit}"
+State Management: "${stateManagement}"
+Core Native Features: ${JSON.stringify(fiturUtama)}
+UI/UX Mobile Principles: ${JSON.stringify(prinsipUI)}
+Extra Libraries: ${JSON.stringify(libraryTambahan)}
+Target Build Platform: "${targetPlatform}"
+Additional Instructions: "${instruksi || 'none'}"`;
+
+  const response = await fetchAI({
+    model,
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user',   content: userPrompt }
+    ],
+    temperature: 0.75,
+    max_tokens: 1800,
+    response_format: { type: 'json_object' }
+  }, { signal });
+
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    throw new Error(errData?.error?.message || `API error (${response.status})`);
+  }
+
+  const data = await response.json();
+  const ai = parseAIResponse(data.choices[0].message.content);
+
+  const jsonBlock = {
+    mood:            ai.mood            || ai.mood_vibe || `${namaApp} mobile application`,
+    resolusi:        ai.resolusi        || ai.resolution || 'Mobile application (iOS & Android)',
+    format_output:   `Fully Functional Mobile Scaffold / ${targetPlatform === 'Universal' ? 'Android APK & iOS IPA' : targetPlatform} Package Ready`,
+    kualitas_cetak:  'Vibe Coding Grade (Mobile IDE ready)',
+    negative_prompt: ai.negative_prompt || ai.negativePrompt || ["heavy web packages", "bloated CSS", "desktop layout"],
+  };
+
+  const briefStr = [
+    `# ROADMAP APP GENERATOR: ${namaApp.toUpperCase()}`,
+    `**Tagline:** ${subjudul} — *"${slogan}"*`,
+    `**Target Build:** ${targetPlatform} (${targetPlatform === 'iOS' ? 'IPA' : targetPlatform === 'Android' ? 'APK' : 'APK & IPA'})`,
+    '',
+    `## 1. DOKUMEN PRD & SRS (SPESIFIKASI)`,
+    `${ai.prd_srs || ai.prdSrs || ai.prd || 'PRD dan SRS belum tersedia.'}`,
+    '',
+    `## 2. ARSITEKTUR & DESAIN SISTEM (SDD)`,
+    `**Framework:** ${techStack} | **Backend/BaaS:** ${backendTech}`,
+    `**Local DB:** ${databaseTech} | **Cloud Storage:** ${mediaStorage}`,
+    `**UI Style:** ${uiKit} | **State:** ${stateManagement}`,
+    '',
+    `${ai.architecture_sdd || ai.architectureSdd || ai.architecture || 'SDD belum tersedia.'}`,
+    '',
+    `## 3. UI/UX & PANDUAN ESTETIKA VISUAL`,
+    `**Fitur Native:** ${fiturUtama.join(', ')}`,
+    `**Prinsip Desain:** ${prinsipUI.join(', ')}`,
+    `**Library Ekstra:** ${libraryTambahan.join(', ')}`,
+    '',
+    `${ai.uiux_aesthetics || ai.uiuxAesthetics || 'UI/UX Aesthetics belum tersedia.'}`,
+    '',
+    `## 4. CHECKLIST OPERASIONAL & TASK BREAKDOWN`,
+    `${ai.task_breakdown || ai.taskBreakdown || 'Task Breakdown belum tersedia.'}`,
+    '',
+    `## 5. PROMPT CODE AI SCATTER (CURSOR / BOLT.NEW / NATIVE IDE)`,
+    '```json',
+    JSON.stringify(jsonBlock, null, 2),
+    '```',
+  ].join('\n');
+
+  return {
+    brief: briefStr,
+    promptData: {
+      ...jsonBlock,
+      prompt_final: ai.prompt_final || ai.promptFinal || ai.prompt || ai.prompt_akhir || 'No prompt generated.'
     }
   };
 };
 
 export const generateBrief = async (formData, signal) => {
-  if (formData.formType === 'assets') {
-    return generateAssetsBrief(formData, signal);
-  } else if (formData.formType === 'portrait') {
-    return generatePortraitBrief(formData, signal);
-  } else if (formData.formType === 'uiux') {
-    return generateUIUXBrief(formData, signal);
-  } else if (formData.formType === 'products') {
-    return generateProductsBrief(formData, signal);
-  } else if (formData.formType === 'scan') {
-    return generateScanBrief(formData, signal);
-  } else if (formData.formType === 'webgen') {
-    return generateWebGenBrief(formData, signal);
-  } else {
-    return generateMediaBrief(formData, signal);
+  try {
+    if (formData.formType === 'assets') {
+      return await generateAssetsBrief(formData, signal);
+    } else if (formData.formType === 'portrait') {
+      return await generatePortraitBrief(formData, signal);
+    } else if (formData.formType === 'uiux') {
+      return await generateUIUXBrief(formData, signal);
+    } else if (formData.formType === 'products') {
+      return await generateProductsBrief(formData, signal);
+    } else if (formData.formType === 'scan') {
+      return await generateScanBrief(formData, signal);
+    } else if (formData.formType === 'webgen') {
+      return await generateWebGenBrief(formData, signal);
+    } else if (formData.formType === 'appgen') {
+      return await generateAppGenBrief(formData, signal);
+    } else {
+      return await generateMediaBrief(formData, signal);
+    }
+  } catch (err) {
+    console.warn("AI generation failed, falling back to local template generator:", err);
+    return generateBriefLocalFallback(formData, err);
   }
+};
+
+const generateBriefLocalFallback = (formData, originalError) => {
+  const isMedia = formData.formType === 'media' || !formData.formType;
+  const isAssets = formData.formType === 'assets';
+  const isPortrait = formData.formType === 'portrait';
+  const isUiux = formData.formType === 'uiux';
+  const isProducts = formData.formType === 'products';
+  const isScan = formData.formType === 'scan';
+  const isWebgen = formData.formType === 'webgen';
+  const isAppgen = formData.formType === 'appgen';
+
+  const offlineWarning = `> ⚠️ **Mode Cadangan Lokal Aktif (Offline / API Error):** Gagal terhubung ke API AI (${originalError.message || 'Koneksi error'}). Brief dan prompt di bawah ini dihasilkan secara otomatis menggunakan mesin template lokal secara instan tanpa biaya API, namun kualitas deskripsi mungkin lebih sederhana dibanding versi AI.\n\n`;
+
+  if (isAssets) {
+    return generateAssetsBriefFallback(formData, offlineWarning);
+  } else if (isPortrait) {
+    return generatePortraitBriefFallback(formData, offlineWarning);
+  } else if (isUiux) {
+    return generateUIUXBriefFallback(formData, offlineWarning);
+  } else if (isProducts) {
+    return generateProductsBriefFallback(formData, offlineWarning);
+  } else if (isScan) {
+    return generateScanBriefFallback(formData, offlineWarning);
+  } else if (isWebgen) {
+    return generateWebGenBriefFallback(formData, offlineWarning);
+  } else if (isAppgen) {
+    return generateAppGenBriefFallback(formData, offlineWarning);
+  } else {
+    return generateMediaBriefFallback(formData, offlineWarning);
+  }
+};const generateMediaBriefFallback = (formData, offlineWarning) => {
+  const judul = formData.judul || 'Judul Desain';
+  const subjudul = formData.subjudul || '';
+  const slogan = formData.slogan || '';
+  const deskripsi = formData.deskripsi || 'Promosi produk atau layanan';
+  const tema = formData.tema || 'Modern & Profesional';
+  const warna = formData.warna || 'Warna kontras & harmonis';
+  const formatMedia = formData.formatMedia || 'Spanduk / Banner Horizontal';
+  const orientasi = formData.orientasi || 'Landscape';
+  const dimensi = formData.dimensi || 'Ukuran Standar';
+  const fontCategory = formData.kategoriFont || 'Geometric Sans-serif';
+  const visualStyle = formData.gayaVisual || 'Flat 2D Vector';
+  const elements = formData.elemen || 'Ornamen pendukung minimalis';
+
+  const mjVersion = formData.mjVersion || '--v 6.0';
+  const arRatio = getArRatio(formData.dimensi, formData.formatMedia, formData.orientasi, mjVersion);
+  const arParam = mjVersion === 'dalle' ? '' : `--ar ${arRatio}`;
+
+  const formatMediaEngMap = {
+    'Spanduk / Banner Horizontal': 'flat horizontal vector graphic',
+    'Poster / Flyer / Brosur': 'flat promotional vector poster graphic',
+    'Brosur Lipat Tiga (Tri-fold)': 'flat tri-fold vector brochure graphic',
+    'Roll-up / X-Banner': 'flat roll-up vector banner graphic',
+    'Instagram Post / Social Media Feed': 'flat social media square vector graphic',
+    'Billboard / Baliho Raksasa': 'flat giant billboard vector graphic',
+    'Billboard Vertical Megatron': 'flat vertical billboard megatron vector graphic',
+    'Web Banner Header 1200x630': 'flat web banner header vector graphic',
+    'Flyer Promosi A5': 'flat A5 flyer vector graphic',
+    'Kemasan Produk / Box Layout': 'flat product packaging box vector graphic',
+    'Kartu Nama Bisnis Premium': 'flat premium business card vector graphic'
+  };
+  const formatEng = formatMediaEngMap[formatMedia] || 'promotional vector graphic';
+
+  const mood = `Desain ${formatMedia} bertema ${tema} dengan fokus visual yang bersih dan profesional.`;
+  const resolusi = dimensi ? `Print-ready ${dimensi} @ 150 DPI` : 'High resolution print template';
+  
+  let font1 = 'Montserrat Bold (judul utama)';
+  let font2 = 'Open Sans Regular (body & kontak)';
+  if (fontCategory.includes('Serif')) {
+    font1 = 'Playfair Display Bold';
+    font2 = 'Lora Regular';
+  } else if (fontCategory.includes('Monospace')) {
+    font1 = 'Fira Code Bold';
+    font2 = 'JetBrains Mono Regular';
+  }
+
+  let edgeInstruction = 'The design must stretch 100% full-bleed from the absolute left border to the absolute right border, and from the absolute top border to the absolute bottom border, touching all four outer edges of the canvas with zero margins, zero borders, zero padding.';
+  const prefix = `A flat 2D digital graphic design file, direct front-facing screenshot view. ${edgeInstruction} The design is a single continuous flat 2D graphic covering 100% of the entire canvas from edge to edge. `;
+  
+  let textElements = `with "Main title text: '${judul}'"`;
+  if (subjudul) textElements += `, subtext: '${subjudul}'`;
+  if (slogan) textElements += `, slogan: '${slogan}'`;
+
+  let promptFinal = '';
+  if (mjVersion === 'dalle') {
+    promptFinal = `${prefix}A flat 2D vector graphic of ${formatEng} for ${judul}, ${textElements}, ${deskripsi}, using ${warna} dominant color palette, ${elements}, flat colors, flat background, full-bleed layout stretching to the absolute edges of the image frame with no margins, no padding, and no borders.`.trim();
+  } else {
+    promptFinal = `${prefix}A flat 2D vector graphic of ${formatEng} for ${judul}, ${textElements}, ${deskripsi}, using ${warna} dominant color palette, ${elements}, flat colors, flat background, full-bleed layout stretching to the absolute edges of the image frame with no margins, no padding, and no borders, ${arParam} ${mjVersion}`.trim();
+  }
+
+  const jsonBlock = {
+    mood: mood,
+    resolusi: resolusi,
+    format_output: 'High-Quality Print-Ready PDF / TIFF',
+    kualitas_cetak: 'Ultra High Print Quality',
+    dpi: '150–300 DPI',
+    design_principles: 'Menerapkan grid visual seimbang secara lokal. Hubungkan elemen utama di tengah atau kiri untuk orientasi landscape.',
+    negative_prompt: ["mockup", "wall background", "perspective mockup", "3d mockup", "hanging on wall", "dinding", "tembok", "room interior", "physical banner stand", "shadows", "depth", "frame", "borders", "typo", "bad text", "hallucination"]
+  };
+
+  const briefStr = [
+    offlineWarning,
+    `## 1. KONSEP VISUAL`,
+    mood,
+    '',
+    `## 2. PANDUAN LAYOUT & TIPOGRAFI`,
+    `Tata letak ${orientasi} dengan hierarki visual yang jelas untuk media ${formatMedia}.`,
+    `- **Tata Letak:** Letakkan judul utama di bagian atas/kiri atas untuk memandu pola baca Z.`,
+    `- **Aksen Warna:** Gunakan skema warna ${warna}.`,
+    `- **Elemen Dekoratif:** Tambahkan ${elements}.`,
+    formData.cta ? `- **Call to Action (CTA):** "${formData.cta}"` : '',
+    '',
+    `**Rekomendasi Font:**`,
+    `- **Font 1 (Judul):** ${font1}`,
+    `- **Font 2 (Kontak/Subjudul):** ${font2}`,
+    '',
+    `## 3. PROMPT AI IMAGE GENERATOR`,
+    '```json',
+    JSON.stringify(jsonBlock, null, 2),
+    '```',
+  ].filter(Boolean).join('\n');
+
+  return {
+    brief: briefStr,
+    promptData: {
+      ...jsonBlock,
+      prompt_final: promptFinal
+    }
+  };
+};
+
+const generateAssetsBriefFallback = (formData, offlineWarning) => {
+  const namaBrand = formData.namaBrand || 'Brand';
+  const tagline = formData.tagline || '';
+  const deskripsi = formData.deskripsi || 'Identitas visual bisnis';
+  const jenisAset = formData.jenisAset || 'Logo';
+  const gayaDesain = formData.gayaDesain || 'Modern & Minimalis';
+  const gayaRendering = formData.gayaRendering || 'Vektor Bersih';
+  const kompleksitas = formData.kompleksitas || 'Minimalist & Simple';
+  const targetSegment = formData.targetSegment || 'Startup / Bisnis';
+  const warna = formData.warna || 'Warna kontras';
+  const formatFile = formData.formatFile || 'PNG Transparan';
+  const background = formData.background || 'Transparan';
+  const orientasi = formData.orientasi || 'Square';
+  const dimensi = formData.dimensi || '1024x1024 px';
+
+  const mjVersion = formData.mjVersion || '--v 6.0';
+  const arRatio = getArRatio(dimensi, null, orientasi, mjVersion);
+  const arParam = mjVersion === 'dalle' ? '' : `--ar ${arRatio}`;
+
+  const mood = `${gayaDesain} ${jenisAset} design, mencerminkan identitas ${namaBrand} yang profesional.`;
+  
+  const bgSuffix = background === 'Transparan'
+    ? 'isolated on a clean solid white background, flat vector colors, easy to trace vector paths'
+    : `solid ${background} background, clean flat design`;
+
+  let promptFinal = '';
+  if (mjVersion === 'dalle') {
+    promptFinal = `Flat 2D vector logo graphic for ${namaBrand}, clean isolated brand identity asset, featuring minimalist icon represent ${deskripsi}, ${warna} color palette, ${bgSuffix}, centered composition, flat digital graphic on a clean flat background.`.trim();
+  } else {
+    promptFinal = `Flat 2D vector logo graphic for ${namaBrand}, clean isolated brand identity asset, featuring minimalist icon represent ${deskripsi}, ${warna} color palette, ${bgSuffix}, centered composition, flat digital graphic on a clean flat background, ${arParam} ${mjVersion}`.trim();
+  }
+
+  const jsonBlock = {
+    mood: mood,
+    resolusi: dimensi || '1000x1000 px @300dpi (PNG) / SVG vector',
+    format_output: formatFile,
+    kualitas_cetak: 'High-Resolution Print & Screen Ready',
+    negative_prompt: ["mockup", "3d render", "photorealistic", "photograph", "shadows", "depth", "perspective", "wall", "room", "product on shelf", "blurry", "watermark", "frame"]
+  };
+
+  const briefStr = [
+    offlineWarning,
+    `## 1. KONSEP VISUAL ASET`,
+    `**Jenis Aset:** ${jenisAset}`,
+    `**Brand:** ${namaBrand}${tagline ? ' — ' + tagline : ''}`,
+    '',
+    `Desain ${jenisAset} bertema ${gayaDesain} untuk segmen ${targetSegment}. Konsep difokuskan pada simbolisme ${deskripsi}.`,
+    '',
+    `## 2. ELEMEN DESAIN & TIPOGRAFI`,
+    `- **Gaya Desain:** ${gayaDesain} (Kompleksitas: ${kompleksitas})`,
+    `- **Gaya Rendering:** ${gayaRendering}`,
+    `- **Warna Utama:** ${warna}`,
+    `- **Background:** ${background}`,
+    '',
+    `## 3. PROMPT AI IMAGE GENERATOR`,
+    '```json',
+    JSON.stringify(jsonBlock, null, 2),
+    '```',
+  ].join('\n');
+
+  return {
+    brief: briefStr,
+    promptData: {
+      ...jsonBlock,
+      prompt_final: promptFinal
+    }
+  };
+};
+
+const generatePortraitBriefFallback = (formData, offlineWarning) => {
+  const namaSubjek = formData.namaSubjek || 'Subjek';
+  const genderUsia = formData.genderUsia || 'Dewasa';
+  const tipeFoto = formData.tipeFoto || 'Pas Foto Resmi';
+  const background = formData.background || 'Latar Merah (KTP Indonesia)';
+  const pakaian = formData.pakaian || 'Pakaian Formal';
+  const ekspresi = formData.ekspresi || 'Ekspresi Netral';
+  const shotType = formData.shotType || 'Close-up';
+  const pencahayaan = formData.pencahayaan || 'Soft studio lighting';
+  const kameraFokus = formData.kameraFokus || 'Sharp Focus';
+  const arahHadap = formData.arahHadap || 'Menghadap Lurus (Frontal)';
+  const orientasi = formData.orientasi || 'Portrait';
+  const dimensi = formData.dimensi || '4x6 cm';
+
+  const mjVersion = formData.mjVersion || '--v 6.0';
+  const arRatio = getArRatio(dimensi, null, orientasi, mjVersion);
+  const arParam = mjVersion === 'dalle' ? '' : `--ar ${arRatio}`;
+
+  let bgClean = background.toLowerCase();
+  if (bgClean.includes('merah')) bgClean = 'solid red background';
+  else if (bgClean.includes('biru')) bgClean = 'solid blue background';
+  else if (bgClean.includes('putih')) bgClean = 'solid white background';
+  else bgClean = 'solid plain background';
+
+  let promptFinal = '';
+  if (mjVersion === 'dalle') {
+    promptFinal = `A formal studio passport photo of a ${genderUsia}, looking straight at the camera, ${ekspresi}, wearing a neat ${pakaian}, shoulders aligned, ${pencahayaan}, ${bgClean}, hyperrealistic portrait, sharp details, 85mm lens, f/8.`.trim();
+  } else {
+    promptFinal = `A formal studio passport photo of a ${genderUsia}, looking straight at the camera, ${ekspresi}, wearing a neat ${pakaian}, shoulders aligned, ${pencahayaan}, ${bgClean}, hyperrealistic portrait, sharp details, 85mm lens, f/8, ${arParam} ${mjVersion}`.trim();
+  }
+
+  const jsonBlock = {
+    mood: `Formal portrait photo for ${namaSubjek}`,
+    resolusi: dimensi || 'Print-ready resolution',
+    format_output: 'PNG / JPEG High Quality',
+    kualitas_cetak: 'High-Definition Photo Print',
+    negative_prompt: ["mockup", "3d render", "cartoon", "blurry", "smile", "shadows on background", "glasses", "bad anatomy", "tilted head", "hands in frame"]
+  };
+
+  const briefStr = [
+    offlineWarning,
+    `## 1. KONSEP FOTO PORTRAIT`,
+    `**Nama Subjek:** ${namaSubjek}`,
+    `**Kategori:** ${tipeFoto} (${genderUsia})`,
+    '',
+    `Pas foto resmi formal dengan subjek menghadap ke depan (${arahHadap}), menggunakan ${pakaian} dan latar belakang ${background}.`,
+    '',
+    `## 2. PENGATURAN STUDIO & GAYA`,
+    `- **Pakaian:** ${pakaian}`,
+    `- **Pencahayaan:** ${pencahayaan}`,
+    `- **Kamera & Lensa:** Rekomendasi lensa portrait 85mm f/8 untuk ketajaman merata.`,
+    `- **Fokus & Ekspresi:** ${kameraFokus}, ${ekspresi}`,
+    '',
+    `## 3. PROMPT AI IMAGE GENERATOR`,
+    '```json',
+    JSON.stringify(jsonBlock, null, 2),
+    '```',
+  ].join('\n');
+
+  return {
+    brief: briefStr,
+    promptData: {
+      ...jsonBlock,
+      prompt_final: promptFinal
+    }
+  };
+};
+
+const generateUIUXBriefFallback = (formData, offlineWarning) => {
+  const namaAplikasi = formData.namaAplikasi || 'App';
+  const jenisUI = formData.jenisUI || 'Web Landing Page';
+  const temaDesain = formData.temaDesain || 'Modern Minimalist';
+  const warna = formData.warna || 'Biru & Slate Grey';
+  const orientasi = formData.orientasi || 'Landscape';
+  const dimensi = formData.dimensi || '1920x1080 px';
+  const widgets = formData.widgets || [];
+  const kepadatanData = formData.kepadatanData || 'Clean Spacing';
+  const kategoriFont = formData.kategoriFont || 'Geometric Sans-serif';
+  const shadowDepth = formData.shadowDepth || 'Flat 2D';
+
+  const mjVersion = formData.mjVersion || '--v 6.0';
+  const arRatio = getArRatio(dimensi, null, orientasi, mjVersion);
+  const arParam = mjVersion === 'dalle' ? '' : `--ar ${arRatio}`;
+
+  const widgetsList = widgets.length ? widgets.join(', ') : 'dashboard card, buttons, charts';
+
+  let promptFinal = '';
+  if (mjVersion === 'dalle') {
+    promptFinal = `Flat 2D high-fidelity UI design layout for a ${jenisUI} of a digital platform named ${namaAplikasi}, ${temaDesain} theme, ${warna} color palette, featuring neat components: ${widgetsList}, ${kepadatanData} spacing, flat desktop screenshot, direct screen capture view, pure interface graphic, flat digital design file.`.trim();
+  } else {
+    promptFinal = `Flat 2D high-fidelity UI design layout for a ${jenisUI} of a digital platform named ${namaAplikasi}, ${temaDesain} theme, ${warna} color palette, featuring neat components: ${widgetsList}, ${kepadatanData} spacing, flat desktop screenshot, direct screen capture view, pure interface graphic, flat digital design file, ${arParam} ${mjVersion}`.trim();
+  }
+
+  const jsonBlock = {
+    mood: `${temaDesain} UI/UX interface for ${namaAplikasi}`,
+    resolusi: dimensi || '1920x1080 px',
+    format_output: 'Figma Design / High-fidelity Screen export',
+    kualitas_cetak: 'Web/Mobile Screen Ready',
+    negative_prompt: ["laptop", "monitor", "perspective mockup", "physical device", "shadows on table", "3d mockup"]
+  };
+
+  const briefStr = [
+    offlineWarning,
+    `## 1. KONSEP VISUAL MOCKUP UI/UX`,
+    `**Aplikasi:** ${namaAplikasi}`,
+    `**Tipe Interface:** ${jenisUI}`,
+    '',
+    `Desain interface flat 2D dengan tema ${temaDesain} dan tata letak ${orientasi}.`,
+    '',
+    `## 2. DESIGN SYSTEM & IDENTITAS`,
+    `- **Palet Warna:** ${warna}`,
+    `- **Tipografi:** Kategori ${kategoriFont}`,
+    `- **Komponen UI:** ${widgetsList} dengan spacing ${kepadatanData} dan bayangan ${shadowDepth}`,
+    '',
+    `## 3. PROMPT AI IMAGE GENERATOR`,
+    '```json',
+    JSON.stringify(jsonBlock, null, 2),
+    '```',
+  ].join('\n');
+
+  return {
+    brief: briefStr,
+    promptData: {
+      ...jsonBlock,
+      prompt_final: promptFinal
+    }
+  };
+};
+
+const generateProductsBriefFallback = (formData, offlineWarning) => {
+  const namaProduk = formData.namaProduk || 'Produk';
+  const gayaKomposisi = formData.gayaKomposisi || 'Front View';
+  const kemasanMaterial = formData.kemasanMaterial || 'Kaca Transparan';
+  const elemenStudio = formData.elemenStudio || 'Podium Batu';
+  const pencahayaan = formData.pencahayaan || 'Studio Soft Box';
+  const warna = formData.warna || 'Neutral Cream';
+  const propsTambahan = formData.propsTambahan || [];
+  const bukaanLensa = formData.bukaanLensa || 'f/4.0';
+  const permukaanDasar = formData.permukaanDasar || 'Podium Batu Alam';
+  const efekAtmosfer = formData.efekAtmosfer || 'Bersih';
+  const orientasi = formData.orientasi || 'Square';
+  const dimensi = formData.dimensi || '1080x1080 px';
+
+  const mjVersion = formData.mjVersion || '--v 6.0';
+  const arRatio = getArRatio(dimensi, null, orientasi, mjVersion);
+  const arParam = mjVersion === 'dalle' ? '' : `--ar ${arRatio}`;
+
+  const propsList = propsTambahan.length ? propsTambahan.join(', ') : 'none';
+
+  let promptFinal = '';
+  if (mjVersion === 'dalle') {
+    promptFinal = `Commercial studio product photography of a ${kemasanMaterial} ${namaProduk} bottle, ${gayaKomposisi}, placed on a ${permukaanDasar}, surrounded by ${elemenStudio}, ${pencahayaan}, ${warna} color tones, ${efekAtmosfer} atmosphere, props: ${propsList}, shot on 50mm lens, ${bukaanLensa}.`.trim();
+  } else {
+    promptFinal = `Commercial studio product photography of a ${kemasanMaterial} ${namaProduk} bottle, ${gayaKomposisi}, placed on a ${permukaanDasar}, surrounded by ${elemenStudio}, ${pencahayaan}, ${warna} color tones, ${efekAtmosfer} atmosphere, props: ${propsList}, shot on 50mm lens, ${bukaanLensa}, ${arParam} ${mjVersion}`.trim();
+  }
+
+  const jsonBlock = {
+    mood: `Luxury product photography for ${namaProduk}`,
+    resolusi: dimensi || '1080x1080 px',
+    format_output: 'High-resolution JPG / PNG',
+    kualitas_cetak: 'E-Commerce Storefront Ready',
+    negative_prompt: ["mockup", "text", "crooked", "drawing", "low quality", "blurry background"]
+  };
+
+  const briefStr = [
+    offlineWarning,
+    `## 1. KONSEP FOTO PRODUK`,
+    `**Nama Produk:** ${namaProduk}`,
+    `**Komposisi:** ${gayaKomposisi}`,
+    '',
+    `Foto komersial mewah untuk produk dengan kemasan ${kemasanMaterial}, diletakkan di atas ${permukaanDasar}.`,
+    '',
+    `## 2. DETAIL ART DIRECTION STUDIO`,
+    `- **Elemen Studio:** ${elemenStudio}`,
+    `- **Pencahayaan:** ${pencahayaan}`,
+    `- **Props Tambahan:** ${propsList}`,
+    `- **Kamera & Lensa:** Set bukaan lensa ${bukaanLensa}`,
+    `- **Skema Warna:** ${warna} dengan efek atmosfer ${efekAtmosfer}`,
+    '',
+    `## 3. PROMPT AI IMAGE GENERATOR`,
+    '```json',
+    JSON.stringify(jsonBlock, null, 2),
+    '```',
+  ].join('\n');
+
+  return {
+    brief: briefStr,
+    promptData: {
+      ...jsonBlock,
+      prompt_final: promptFinal
+    }
+  };
+};
+
+const generateScanBriefFallback = (formData, offlineWarning) => {
+  const targetOutput = formData.targetOutput || 'Media Promosi';
+  const mjVersion = formData.mjVersion || '--v 6.0';
+
+  const jsonBlock = {
+    mood: 'Menyesuaikan gambar referensi (Offline Mode)',
+    resolusi: 'Sesuai format target',
+    format_output: 'Replikasi Gambar',
+    kualitas_cetak: 'Standard replication',
+    negative_prompt: ['mockup', 'text', 'lowres', 'blurry']
+  };
+
+  const briefStr = [
+    offlineWarning,
+    `## ⚠️ Vision API Offline`,
+    `Pemindaian gambar dinamis membutuhkan koneksi ke Vision API AI. Karena koneksi saat ini sedang tidak tersedia, kami tidak dapat menganalisis gambar Anda.`,
+    '',
+    `Silakan periksa konfigurasi API Key atau jaringan internet Anda.`,
+    '',
+    `## PROMPT AI IMAGE GENERATOR (PLACEHOLDER)`,
+    '```json',
+    JSON.stringify(jsonBlock, null, 2),
+    '```',
+  ].join('\n');
+
+  return {
+    brief: briefStr,
+    promptData: {
+      ...jsonBlock,
+      prompt_final: `A replication of the user-provided reference image, target output ${targetOutput}, high fidelity, sharp focus, 8K. ${mjVersion}`
+    }
+  };
+};
+
+const generateWebGenBriefFallback = (formData, offlineWarning) => {
+  const namaProject = formData.namaProject || 'App Project';
+  const subjudul = formData.subjudul || '';
+  const slogan = formData.slogan || '';
+  const deskripsi = formData.deskripsi || 'Sebuah aplikasi web modern';
+  const techStack = formData.techStack || 'React / Vue';
+  const backendTech = formData.backendTech || 'Node.js';
+  const databaseTech = formData.databaseTech || 'Supabase';
+  const mediaStorage = formData.mediaStorage || 'Cloudinary';
+  const uiKit = formData.uiKit || 'Tailwind CSS';
+  const stateManagement = formData.stateManagement || 'Standard State';
+  const fiturUtama = formData.fiturUtama || [];
+  const prinsipUI = formData.prinsipUI || [];
+  const libraryTambahan = formData.libraryTambahan || [];
+
+  const jsonBlock = {
+    mood: `${namaProject} web application development brief`,
+    resolusi: 'Responsive web layout',
+    format_output: 'Clean Developer Brief',
+    kualitas_cetak: 'Developer Roadmap ready',
+    negative_prompt: ["bloated packages", "jquery", "slow transitions"]
+  };
+
+  const briefStr = [
+    offlineWarning,
+    `# ROADMAP WEB GENERATOR: ${namaProject.toUpperCase()}`,
+    subjudul ? `**Tagline:** ${subjudul}` : '',
+    slogan ? `*"${slogan}"*` : '',
+    '',
+    `## 1. DOKUMEN PRD & SRS (SPESIFIKASI)`,
+    `- **Nama Proyek:** ${namaProject}`,
+    `- **Deskripsi:** ${deskripsi}`,
+    `- **Fitur Utama:** ${fiturUtama.join(', ') || 'Fitur standar CRUD'}`,
+    '',
+    `## 2. ARSITEKTUR & DESAIN SISTEM (SDD)`,
+    `- **Frontend:** ${techStack} dengan UI Kit ${uiKit}`,
+    `- **Backend & Database:** ${backendTech} & ${databaseTech}`,
+    `- **Penyimpanan Media:** ${mediaStorage}`,
+    `- **State Management:** ${stateManagement}`,
+    '',
+    `## 3. UI/UX & PANDUAN ESTETIKA VISUAL`,
+    `Prinsip UI/UX yang diterapkan: ${prinsipUI.join(', ') || 'Clean & Minimalist design'}`,
+    `Library tambahan: ${libraryTambahan.join(', ') || 'None'}`,
+    '',
+    `## 4. PROMPT DEVELOPER CODESPACE (CURSOR/BOLT.NEW)`,
+    '```json',
+    JSON.stringify(jsonBlock, null, 2),
+    '```',
+  ].filter(Boolean).join('\n');
+
+  return {
+    brief: briefStr,
+    promptData: {
+      ...jsonBlock,
+      prompt_final: `Create a fully functional web application named "${namaProject}" using ${techStack} and ${uiKit}. Integrate ${backendTech} with ${databaseTech} database. The application is described as: ${deskripsi}. Key features include: ${fiturUtama.join(', ')}.`
+    }
+  };
+};
+
+const generateAppGenBriefFallback = (formData, offlineWarning) => {
+  const namaApp         = formData.namaApp || 'Habit Tracker App';
+  const subjudul        = formData.subjudul || 'Konsistensi Harian Anda';
+  const slogan          = formData.slogan || 'Sehat Setiap Hari';
+  const deskripsi       = formData.deskripsi || 'Aplikasi pendukung produktivitas dan kebiasaan baik.';
+  const techStack       = formData.techStack || 'Flutter';
+  const backendTech     = formData.backendTech || 'Firebase BaaS';
+  const databaseTech    = formData.databaseTech || 'SQLite';
+  const mediaStorage    = formData.mediaStorage || 'Local Storage';
+  const uiKit           = formData.uiKit || 'Material Design 3';
+  const stateManagement = formData.stateManagement || 'Bloc';
+  const fiturUtama      = formData.fiturUtama || [];
+  const prinsipUI       = formData.prinsipUI || [];
+  const libraryTambahan = formData.libraryTambahan || [];
+  const targetPlatform  = formData.targetPlatform || 'Universal';
+  const instruksi       = formData.instruksi || '';
+
+  const jsonBlock = {
+    mood: `${namaApp} mobile app development brief`,
+    resolusi: `Mobile layout (${targetPlatform})`,
+    format_output: 'Clean Developer Mobile Scaffold',
+    kualitas_cetak: 'Mobile Roadmap ready',
+    negative_prompt: ["bloated packages", "desktop web layout", "slow transitions"]
+  };
+
+  const briefStr = [
+    offlineWarning,
+    `# ROADMAP APP GENERATOR: ${namaApp.toUpperCase()}`,
+    subjudul ? `**Tagline:** ${subjudul}` : '',
+    slogan ? `*"${slogan}"*` : '',
+    `**Target Platform:** ${targetPlatform}`,
+    '',
+    `## 1. DOKUMEN PRD & SRS (SPESIFIKASI)`,
+    `- **Nama Aplikasi:** ${namaApp}`,
+    `- **Deskripsi:** ${deskripsi}`,
+    `- **Fitur Utama:** ${fiturUtama.join(', ') || 'Fitur CRUD & local authentication'}`,
+    '',
+    `## 2. ARSITEKTUR & DESAIN SISTEM (SDD)`,
+    `- **Framework & UI Style:** ${techStack} dengan ${uiKit}`,
+    `- **Backend & Database:** ${backendTech} & ${databaseTech}`,
+    `- **Penyimpanan Media:** ${mediaStorage}`,
+    `- **State Management:** ${stateManagement}`,
+    '',
+    `## 3. UI/UX & PANDUAN ESTETIKA VISUAL`,
+    `Prinsip UI/UX yang diterapkan: ${prinsipUI.join(', ') || 'Native gesture & One-hand usability'}`,
+    `Library tambahan: ${libraryTambahan.join(', ') || 'None'}`,
+    formData.instruksi ? `*Instruksi Integrasi Khusus:* ${formData.instruksi}` : '',
+    '',
+    `## 4. PROMPT DEVELOPER CODESPACE (CURSOR/EXPO/FLUTTER)`,
+    '```json',
+    JSON.stringify(jsonBlock, null, 2),
+    '```',
+  ].filter(Boolean).join('\n');
+
+  return {
+    brief: briefStr,
+    promptData: {
+      ...jsonBlock,
+      prompt_final: `Create a fully functional mobile application named "${namaApp}" using ${techStack} with ${uiKit} UI style. Integrate ${backendTech} with ${databaseTech} database. Target platform is ${targetPlatform}. Key features include: ${fiturUtama.join(', ')}. The application description: ${deskripsi}.`
+    }
+  };
 };

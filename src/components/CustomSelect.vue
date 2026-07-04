@@ -200,7 +200,9 @@ onUnmounted(() => {
   border: 1px solid var(--border-color);
   border-radius: 6px;
   color: var(--text-main);
-  display: flex;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
   justify-content: space-between;
   align-items: center;
   cursor: text;
@@ -219,14 +221,17 @@ onUnmounted(() => {
 }
 
 .combobox-input {
-  background: transparent;
-  border: none;
-  outline: none;
+  flex: 1 1 0% !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
   color: var(--text-main);
   font-family: var(--sans-font);
   font-size: var(--text-base);
   line-height: var(--lh-base);
-  width: 100%;
   padding: 0;
 }
 

@@ -10,7 +10,7 @@
         <label class="form-label">Nama Projek / Website</label>
         <div class="input-wrapper">
           <input type="text" v-model="formDataWebGen.namaProject" class="input-text" placeholder="E.g. Nusantara Trip Planner, GENSV Studio..." />
-          <button v-if="formDataWebGen.namaProject" @click="formDataWebGen.namaProject = ''" class="btn-clear-input" type="button" aria-label="Clear input">&times;</button>
+          <button v-if="formDataWebGen.namaProject" @click="formDataWebGen.namaProject = ''; saranAI = '';" class="btn-clear-input" type="button" aria-label="Clear input">&times;</button>
         </div>
       </div>
       <div class="form-group" style="margin-top: 8px; margin-bottom: var(--space-md);">
@@ -25,6 +25,20 @@
           {{ autoFilling ? 'Generating...' : 'FILL FROM Nama Projek / Website' }}
         </button>
       </div>
+
+      <!-- AI Recommendation / Kotak Saran Box -->
+      <Transition name="fade-slide">
+        <div v-if="saranAI" class="ai-advice-box">
+          <div class="advice-header">
+            <svg class="advice-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A5 5 0 0 0 8 8c0 1 .3 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/>
+              <path d="M9 18h6"/><path d="M10 22h4"/>
+            </svg>
+            <span class="advice-title">Rekomendasi Arsitektur & Strategi AI</span>
+          </div>
+          <p class="advice-content">{{ saranAI }}</p>
+        </div>
+      </Transition>
       <div class="form-group">
         <label class="form-label">Subjudul / Tagline</label>
         <div class="input-wrapper">
@@ -421,6 +435,8 @@ const removeExtraLib = (val) => {
   }
 };
 
+const saranAI = ref('');
+
 const autoFillWebGen = async () => {
   if (!props.formDataWebGen.namaProject) return;
   emit('update-autofill-status', { autoFilling: true, error: '' });
@@ -428,19 +444,19 @@ const autoFillWebGen = async () => {
   const model  = 'llama-3.3-70b-versatile';
 
   const systemPrompt = `[ROLE / PERSONA]
-You are a creative web copywriter and systems architect.
+You are an expert systems architect and lead developer.
 
 [CONTEXT]
-You are helping a developer generate a mock web application project configuration to auto-populate the brief and prompt.
+You are helping a developer configure a mock web project profile based on the project name.
 
-[TASK]
-Generate a realistic, specific project identity and technical specs.
+[RULES FOR TECH STACK CONFIGURATION]
+1. CONFIGURATION PROPORTIONALITY: Choose a tech stack that is sensible and proportional to the project scale.
+   - STATIC/PERSONAL SITES (e.g., Portofolio, Personal Blog, Landing Page, Biodata): Prefer "Vue 3 + Vite" or "Nuxt 3" (static). Backend should be "Supabase Serverless" (no custom backend). Database should be "Supabase (PostgreSQL)". Keep it simple, lightweight, and serverless.
+   - COMPLEX WEB APPS (e.g., SaaS, E-commerce, Kasir, Dashboard, Booking): Choose full framework ("Next.js" or "Nuxt 3" or "React + Vite"), backend ("Node.js + Fastify" or "Golang + Fiber/Gin"), and robust DB ("PostgreSQL" or "MongoDB").
+2. TECH COMPATIBILITY: The selected options must be compatible. If you use Vue, prefer Pinia. If you use SvelteKit, do not use Pinia (choose Zustand or Context).
 
 [INSTRUCTION]
-Return ONLY a valid JSON object matching the requested keys. Use modern, popular web technologies.
-
-[PARAMETERS / CONSTRAINTS]
-Output must be valid JSON with exact specified keys. Descriptions, titles, slogans must be in Indonesian.`;
+Return ONLY a valid JSON object matching the requested keys. Use modern, popular web technologies. Output in Indonesian.`;
 
   const userPrompt = `Generate a web project profile for a project named: "${props.formDataWebGen.namaProject}".
 Return ONLY a valid JSON object with EXACTLY these keys:
@@ -458,7 +474,8 @@ Return ONLY a valid JSON object with EXACTLY these keys:
   "fiturUtama": ["array of 2-4 features from: 'Authentication (Login/Register)', 'Responsive Layout (Mobile & Desktop)', 'Dark Mode Priority', 'Multi-step Dynamic Input Form', 'Realtime Sync & Subscription', 'Payment Gateway Integration'"],
   "prinsipUI": ["array of 2-4 UI principles from: 'Minimalis Modern', 'Dark Mode Prioritas', 'Whitespace Lega (Clean)', 'Borderless & Minim Box'"],
   "libraryTambahan": ["array of 2-3 libraries from: 'zod (Validation)', 'vueuse (Vue composables)', 'i18next / vue-i18n (Multi-language)', 'Leaflet (Maps)'"],
-  "instruksi": "1-2 sentence Indonesian additional developer instructions"
+  "instruksi": "1-2 sentence Indonesian additional developer instructions",
+  "saranAI": "Detailed architectural advice (in Indonesian, 3-4 sentences) tailored specifically to the project type of \\"${props.formDataWebGen.namaProject}\\". YOU MUST: 1. Identify the project category (e.g. portfolio, e-commerce, dashboard, SaaS). 2. Give tailored advice: if it is a portfolio/personal site, explain that a backend is not needed and suggest a static deploy on Vercel with third-party contact forms. If it is SaaS or E-commerce, explain the need for secure payment gateways and serverless databases. 3. Explicitly reference the project name \\"${props.formDataWebGen.namaProject}\\" in the advice. Do NOT write generic or repetitive text."
 }`;
 
   try {
@@ -469,7 +486,7 @@ Return ONLY a valid JSON object with EXACTLY these keys:
         { role: 'user',   content: userPrompt },
       ],
       temperature: 0.9,
-      max_tokens: 600,
+      max_tokens: 700,
       response_format: { type: 'json_object' },
     });
 
@@ -494,11 +511,47 @@ Return ONLY a valid JSON object with EXACTLY these keys:
     props.formDataWebGen.prinsipUI       = parsed.prinsipUI || ['Minimalis Modern', 'Dark Mode Prioritas'];
     props.formDataWebGen.libraryTambahan = parsed.libraryTambahan || ['zod (Validation)'];
     props.formDataWebGen.instruksi       = parsed.instruksi || '';
+    saranAI.value                        = parsed.saranAI || 'Rekomendasi Arsitektur: Website siap dideploy menggunakan arsitektur modern.';
 
     emit('update-autofill-status', { autoFilling: false, error: '' });
   } catch (err) {
     console.error(err);
-    emit('update-autofill-status', { autoFilling: false, error: 'Gagal generate Website data.' });
+    // Dynamic local fallback values based on project name keywords
+    const pName = String(props.formDataWebGen.namaProject).toLowerCase();
+    
+    if (pName.includes('portofolio') || pName.includes('portfolio') || pName.includes('biodata') || pName.includes('profile')) {
+      props.formDataWebGen.subjudul        = 'Digital Showcase & Resume';
+      props.formDataWebGen.slogan          = 'Menghubungkan Keahlian dan Peluang';
+      props.formDataWebGen.deskripsi       = 'Website portofolio profesional untuk menampilkan proyek unggulan, riwayat kerja, dan cara menghubungi saya secara cepat dan mudah.';
+      props.formDataWebGen.techStack       = 'Vue 3 + Vite';
+      props.formDataWebGen.backendTech     = 'Supabase Serverless';
+      props.formDataWebGen.databaseTech    = 'Supabase (PostgreSQL)';
+      props.formDataWebGen.mediaStorage    = 'Supabase Storage';
+      props.formDataWebGen.uiKit           = 'daisyui';
+      props.formDataWebGen.stateManagement = 'Pinia';
+      props.formDataWebGen.fiturUtama      = ['Responsive Layout (Mobile & Desktop)', 'Dark Mode Priority'];
+      props.formDataWebGen.prinsipUI       = ['Minimalis Modern', 'Whitespace Lega (Clean)', 'Borderless & Minim Box'];
+      props.formDataWebGen.libraryTambahan = ['vueuse (Vue composables)', 'Lucide Icons / Heroicons'];
+      props.formDataWebGen.instruksi       = 'Deploy proyek ini sebagai website statis di Vercel atau Netlify agar 100% gratis, super cepat, dan aman.';
+      saranAI.value                        = '💡 Saran Strategi AI (Mode Lokal): Website jenis portofolio TIDAK wajib menggunakan backend kustom. Sangat disarankan men-deploy frontend-nya secara statis di Vercel. Untuk formulir kontak, gunakan integrasi pihak ketiga seperti EmailJS agar tetap tanpa biaya server dan terhindar dari pemeliharaan database.';
+    } else {
+      props.formDataWebGen.subjudul        = 'Platform Digital Terintegrasi';
+      props.formDataWebGen.slogan          = 'Solusi Terbaik untuk Aktivitas Anda';
+      props.formDataWebGen.deskripsi       = `Aplikasi berbasis web modern untuk mendukung pengelolaan projek ${props.formDataWebGen.namaProject} secara efisien dengan antarmuka yang bersih dan interaktif.`;
+      props.formDataWebGen.techStack       = 'Vue 3 + Vite / Nuxt 3';
+      props.formDataWebGen.backendTech     = 'Node.js + Fastify';
+      props.formDataWebGen.databaseTech    = 'Supabase (PostgreSQL)';
+      props.formDataWebGen.mediaStorage    = 'Cloudinary';
+      props.formDataWebGen.uiKit           = 'shadcn/ui';
+      props.formDataWebGen.stateManagement = 'Zustand + TanStack Query';
+      props.formDataWebGen.fiturUtama      = ['Authentication (Login/Register)', 'Responsive Layout (Mobile & Desktop)', 'Dark Mode Priority'];
+      props.formDataWebGen.prinsipUI       = ['Minimalis Modern', 'Dark Mode Prioritas', 'Whitespace Lega (Clean)'];
+      props.formDataWebGen.libraryTambahan = ['zod (Validation)', 'vueuse (Vue composables)'];
+      props.formDataWebGen.instruksi       = 'Pastikan file koneksi Supabase terisolasi dengan baik menggunakan variabel lingkungan (.env).';
+      saranAI.value                        = `💡 Saran Strategi AI (Mode Lokal): Untuk proyek "${props.formDataWebGen.namaProject}", gunakan arsitektur decoupled (terpisah). Hosting frontend Vue di Vercel dan manfaatkan Fastify untuk API backend berkecepatan tinggi. Gunakan Supabase untuk database realtime & modul otorisasi instan.`;
+    }
+
+    emit('update-autofill-status', { autoFilling: false, error: '' });
   }
 };
 
@@ -623,5 +676,60 @@ defineExpose({
 .fade-tooltip-leave-to {
   opacity: 0;
   transform: translateY(6px);
+}
+
+/* AI Advice / Recommendation Card Box */
+.ai-advice-box {
+  margin-top: 4px;
+  margin-bottom: var(--space-md);
+  padding: 14px 16px;
+  background: rgba(0, 240, 255, 0.03);
+  border: 1px solid rgba(0, 240, 255, 0.15);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 0 10px rgba(0, 240, 255, 0.03);
+}
+
+:root[data-theme="light"] .ai-advice-box {
+  background: rgba(37, 99, 235, 0.02);
+  border-color: rgba(37, 99, 235, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05), 0 0 10px rgba(37, 99, 235, 0.03);
+}
+
+.advice-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  color: var(--accent-color);
+}
+
+.advice-icon {
+  flex-shrink: 0;
+}
+
+.advice-title {
+  font-family: var(--display-font);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: var(--ls-wide);
+}
+
+.advice-content {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* Advice slide animation */
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.fade-slide-enter-from,
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
 }
 </style>

@@ -64,6 +64,13 @@
           </svg>
           <span class="btn-text">Website Generator</span>
         </button>
+        <button type="button" class="nav-menu-btn" :class="{ active: activeTab === 'appgen' }" @click="activeTab = 'appgen'; isSideNavOpen = false">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+            <line x1="12" y1="18" x2="12.01" y2="18"/>
+          </svg>
+          <span class="btn-text">App / APK Generator</span>
+        </button>
         <button type="button" class="nav-menu-btn" :class="{ active: activeTab === 'designskills' }" @click="activeTab = 'designskills'; isSideNavOpen = false">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
@@ -161,7 +168,7 @@
       <!-- ─ Tab 1: Media Promosi ─────────────────────── -->
       <MediaPromosiForm
         ref="mediaFormRef"
-        v-show="activeTab === 'media'"
+        v-if="activeTab === 'media'"
         :formData="formData"
         :loading="loading"
         :autoFilling="autoFilling"
@@ -173,7 +180,7 @@
       <!-- ─ Tab 2: Aset Visual ──────────────────────── -->
       <VisualAssetsForm
         ref="assetsFormRef"
-        v-show="activeTab === 'assets'"
+        v-if="activeTab === 'assets'"
         :formDataAssets="formDataAssets"
         :loading="loading"
         :autoFilling="autoFilling"
@@ -184,7 +191,7 @@
       <!-- ─ Tab 3: Pas Foto & Portrait ─────────────────────── -->
       <PortraitForm
         ref="portraitFormRef"
-        v-show="activeTab === 'portrait'"
+        v-if="activeTab === 'portrait'"
         :formDataPortrait="formDataPortrait"
         :loading="loading"
         :autoFilling="autoFilling"
@@ -194,7 +201,7 @@
       <!-- ─ Tab 4: Mockup UI/UX ────────────────────────────── -->
       <UIUXForm
         ref="uiuxFormRef"
-        v-show="activeTab === 'uiux'"
+        v-if="activeTab === 'uiux'"
         :formDataUIUX="formDataUIUX"
         :loading="loading"
         :autoFilling="autoFilling"
@@ -204,7 +211,7 @@
       <!-- ─ Tab 5: Foto Produk Studio ─────────────────────── -->
       <ProductsForm
         ref="productsFormRef"
-        v-show="activeTab === 'products'"
+        v-if="activeTab === 'products'"
         :formDataProducts="formDataProducts"
         :loading="loading"
         :autoFilling="autoFilling"
@@ -214,7 +221,7 @@
       <!-- ─ Tab 6: Scan Image ─────────────────────────────── -->
       <ScanImageForm
         ref="scanFormRef"
-        v-show="activeTab === 'scan'"
+        v-if="activeTab === 'scan'"
         :formDataScan="formDataScan"
         :loading="loading"
       />
@@ -222,8 +229,18 @@
       <!-- ─ Tab 7: Website Generator ────────────────────────── -->
       <WebsiteGeneratorForm
         ref="webgenFormRef"
-        v-show="activeTab === 'webgen'"
+        v-if="activeTab === 'webgen'"
         :formDataWebGen="formDataWebGen"
+        :loading="loading"
+        :autoFilling="autoFilling"
+        @update-autofill-status="handleAutofillStatus"
+      />
+
+      <!-- ─ Tab 9: App / APK Generator ────────────────────────── -->
+      <AppGeneratorForm
+        ref="appgenFormRef"
+        v-if="activeTab === 'appgen'"
+        :formDataAppGen="formDataAppGen"
         :loading="loading"
         :autoFilling="autoFilling"
         @update-autofill-status="handleAutofillStatus"
@@ -231,7 +248,7 @@
 
       <!-- ─ Tab 8: Design Skills Explorer ───────────────────── -->
       <DesignSkillsForm
-        v-show="activeTab === 'designskills'"
+        v-if="activeTab === 'designskills'"
         @preview-skill="$emit('preview-skill', $event)"
       />
 
@@ -288,6 +305,7 @@ import UIUXForm from './forms/UIUXForm.vue';
 import ProductsForm from './forms/ProductsForm.vue';
 import ScanImageForm from './forms/ScanImageForm.vue';
 import WebsiteGeneratorForm from './forms/WebsiteGeneratorForm.vue';
+import AppGeneratorForm from './forms/AppGeneratorForm.vue';
 import DesignSkillsForm from './forms/DesignSkillsForm.vue';
 
 const props = defineProps({
@@ -307,6 +325,7 @@ const activeTabLabel = computed(() => {
     case 'products': return 'Foto Produk Studio';
     case 'scan': return 'Scan Image';
     case 'webgen': return 'Website Generator';
+    case 'appgen': return 'App / APK Generator';
     case 'designskills': return 'Design Skills';
     default: return 'Design Brief';
   }
@@ -322,6 +341,7 @@ const portraitFormRef = ref(null);
 const uiuxFormRef = ref(null);
 const productsFormRef = ref(null);
 const webgenFormRef = ref(null);
+const appgenFormRef = ref(null);
 
 const handleAutofillStatus = (status) => {
   autoFilling.value = status.autoFilling;
@@ -344,6 +364,8 @@ const autoFill = () => {
     productsFormRef.value.autoFill();
   } else if (activeTab.value === 'webgen' && webgenFormRef.value) {
     webgenFormRef.value.autoFill();
+  } else if (activeTab.value === 'appgen' && appgenFormRef.value) {
+    appgenFormRef.value.autoFill();
   }
 };
 
@@ -510,6 +532,24 @@ const formDataWebGen = reactive({
   instruksi: '',
 });
 
+const formDataAppGen = reactive({
+  namaApp: '',
+  subjudul: '',
+  slogan: '',
+  deskripsi: '',
+  techStack: 'Flutter',
+  backendTech: 'Supabase Serverless',
+  databaseTech: 'SQLite',
+  mediaStorage: 'Local Storage',
+  uiKit: 'Material Design 3',
+  stateManagement: 'Bloc',
+  fiturUtama: ['Push Notifications (FCM/APNS)', 'Biometric Authentication (FaceID/Fingerprint)'],
+  prinsipUI: ['Native Gesture Navigation', 'Adaptive Dark Mode'],
+  libraryTambahan: ['Lottie (Animations)'],
+  targetPlatform: 'Universal',
+  instruksi: '',
+});
+
 // ─── Preset Data Loader ──────────────────────────────────────────────
 const loadPresetData = () => {
   formData.judul       = 'Promo Makan Hemat';
@@ -558,6 +598,8 @@ const handleSubmit = () => {
     emit('submit-brief', { ...formDataScan, formType: 'scan' });
   } else if (activeTab.value === 'webgen') {
     emit('submit-brief', { ...formDataWebGen, formType: 'webgen' });
+  } else if (activeTab.value === 'appgen') {
+    emit('submit-brief', { ...formDataAppGen, formType: 'appgen' });
   } else {
     emit('submit-brief', { ...formData, formType: 'media' });
   }
